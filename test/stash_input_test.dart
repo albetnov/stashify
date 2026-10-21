@@ -16,7 +16,22 @@ Widget _host({
   );
 }
 
+bool _isEnabled(WidgetTester tester, String label) {
+  final button = tester.widget<FilledButton>(
+    find.widgetWithText(FilledButton, label),
+  );
+  return button.onPressed != null;
+}
+
 void main() {
+  testWidgets('An empty field says feeds always work',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_host(onSubmit: (_) async => true, pending: signal(false)));
+
+    expect(find.text('RSS feeds always work'), findsOneWidget);
+    expect(_isEnabled(tester, 'Stash'), isFalse);
+  });
+
   testWidgets('An invalid URL is reported inline and never submitted',
       (WidgetTester tester) async {
     final urls = <String>[];
@@ -54,11 +69,55 @@ void main() {
     );
     await tester.pump();
     expect(find.text('Feed supported'), findsOneWidget);
+    expect(_isEnabled(tester, 'Stash'), isTrue);
 
     await tester.tap(find.widgetWithText(FilledButton, 'Stash'));
     await tester.pump();
 
     expect(urls, ['https://example.com/feed.xml']);
+  });
+
+  testWidgets('An article on an unsupported site greys the button out',
+      (WidgetTester tester) async {
+    final urls = <String>[];
+    await tester.pumpWidget(_host(
+      onSubmit: (url) async {
+        urls.add(url);
+        return true;
+      },
+      pending: signal(false),
+    ));
+
+    await tester.enterText(
+      find.byType(TextField),
+      'https://example.com/some/article',
+    );
+    await tester.pump();
+
+    expect(find.text('Not supported'), findsOneWidget);
+    expect(_isEnabled(tester, 'Stash'), isFalse);
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Stash'));
+    await tester.pump();
+
+    expect(urls, isEmpty);
+  });
+
+  testWidgets('The badge explains what stashes well',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(_host(onSubmit: (_) async => true, pending: signal(false)));
+
+    await tester.enterText(
+      find.byType(TextField),
+      'https://example.com/some/article',
+    );
+    await tester.pump();
+
+    await tester.tap(find.text('Not supported'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('What stashes well'), findsOneWidget);
+    expect(find.text('Not yet — no sites are supported.'), findsOneWidget);
   });
 
   testWidgets('The button is pending while the write runs',
@@ -68,7 +127,7 @@ void main() {
 
     await tester.enterText(
       find.byType(TextField),
-      'https://example.com/article',
+      'https://example.com/feed.xml',
     );
     await tester.pump();
     expect(find.text('Stash'), findsOneWidget);

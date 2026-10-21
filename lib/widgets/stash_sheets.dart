@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import 'package:stashify/data/supported_sites.dart';
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/utils/link_utils.dart';
 
@@ -23,10 +24,13 @@ Future<void> showSupportedSheet(BuildContext context) {
               body: 'Any feed URL, including /feed and .xml links.',
             ),
             const SizedBox(height: 12),
-            const _SupportedRow(
+            _SupportedRow(
               icon: Icons.article_outlined,
               title: 'Article pages',
-              body: 'News posts, blog posts, and essays with a readable body.',
+              body: supportedArticleHosts.isEmpty
+                  ? 'Not yet — no sites are supported.'
+                  : 'These sites are supported: '
+                      '${supportedArticleHosts.join(', ')}.',
             ),
           ],
         ),

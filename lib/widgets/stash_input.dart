@@ -25,8 +25,17 @@ class StashInput extends StatefulWidget {
 class _StashInputState extends State<StashInput> {
   final _urlController = TextEditingController();
 
-  UrlSupport _support = UrlSupport.none;
+  StashSupport _support = StashSupport.none;
   String? _fieldError;
+
+  /// Whether the link in the field can be stashed.
+  ///
+  /// An article on an unsupported site cannot, so the button greys out and
+  /// the badge says why. A link that is not a link yet leaves the button
+  /// live: tapping it says what is wrong with it.
+  bool get _stashable =>
+      _support != StashSupport.unsupportedArticle &&
+      _urlController.text.trim().isNotEmpty;
 
   @override
   void initState() {
@@ -55,7 +64,7 @@ class _StashInputState extends State<StashInput> {
     final raw = _urlController.text.trim();
     if (raw.isEmpty) return;
 
-    if (supportFor(raw) == UrlSupport.none) {
+    if (supportFor(raw) == StashSupport.none) {
       setState(() {
         _fieldError = 'Enter a valid http(s) link to an article or feed.';
       });
@@ -114,8 +123,7 @@ class _StashInputState extends State<StashInput> {
             SignalBuilder(
               builder: (context) {
                 final pending = widget.isPending.value;
-                final canStash =
-                    _urlController.text.trim().isNotEmpty && !pending;
+                final canStash = _stashable && !pending;
 
                 return Wrap(
                   spacing: 8,
@@ -125,9 +133,7 @@ class _StashInputState extends State<StashInput> {
                   children: [
                     SupportChip(
                       support: _support,
-                      onTap: _support == UrlSupport.none
-                          ? null
-                          : () => showSupportedSheet(context),
+                      onTap: () => showSupportedSheet(context),
                     ),
                     FilledButton.icon(
                       onPressed: canStash ? _submit : null,

@@ -104,6 +104,22 @@ void main() {
     expect(service.items.value, isEmpty);
   });
 
+  test('an article on an unsupported site is refused', () async {
+    final service = serviceServing(feedXml);
+
+    await expectLater(
+      service.stash('https://example.com/some/article'),
+      throwsA(
+        isA<StashException>().having(
+          (e) => e.message,
+          'message',
+          contains('not supported'),
+        ),
+      ),
+    );
+    expect(service.items.value, isEmpty);
+  });
+
   test('remove takes the item out and restore puts it back', () async {
     final service = serviceServing(feedXml);
     final item = await service.stash('https://example.com/feed.xml');

@@ -26,10 +26,21 @@ class StashService {
   /// write adds nothing: the card tells the user, and the link stays in the
   /// field.
   Future<StashItem> stash(String raw) async {
-    if (supportFor(raw) == UrlSupport.none) {
-      throw const StashException('That does not look like a link.');
+    switch (supportFor(raw)) {
+      case StashSupport.none:
+        throw const StashException('That does not look like a link.');
+      case StashSupport.unsupportedArticle:
+        throw StashException(
+          'Articles from ${domainOf(raw)} are not supported yet.',
+        );
+      case StashSupport.supportedArticle:
+        throw UnimplementedError('The article parser is not built yet.');
+      case StashSupport.feed:
+        return _stashFeed(raw);
     }
+  }
 
+  Future<StashItem> _stashFeed(String raw) async {
     final uri = Uri.parse(raw);
 
     final http.Response response;

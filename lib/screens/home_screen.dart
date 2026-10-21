@@ -109,6 +109,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 4),
 
+                  // DO NOT ADD FLEXIBLE HERE! IT MESS THE DESIGN
                   Text(
                     'On this device',
                     overflow: TextOverflow.ellipsis,
