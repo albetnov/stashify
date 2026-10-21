@@ -64,4 +64,26 @@ void main() {
     expect(supportFor('https://example.com/some/article'),
         StashSupport.unsupportedArticle);
   });
+
+  group('isSupportedArticleHost', () {
+    test('checks the host only, never the feed sniffing', () {
+      expect(isSupportedArticleHost('https://albetnv.dev/blog/story'), isTrue);
+      expect(
+        isSupportedArticleHost('https://notes.albetnv.dev/x'),
+        isTrue,
+      );
+      // A path that looks like a feed must not matter for entry links.
+      expect(isSupportedArticleHost('https://albetnv.dev/feed.xml'), isTrue);
+    });
+
+    test('rejects unknown hosts and nonsense', () {
+      expect(isSupportedArticleHost('https://example.com/story'), isFalse);
+      expect(
+        isSupportedArticleHost('https://evil-albetnv.dev/story'),
+        isFalse,
+      );
+      expect(isSupportedArticleHost('not a url'), isFalse);
+      expect(isSupportedArticleHost(''), isFalse);
+    });
+  });
 }

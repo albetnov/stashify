@@ -79,6 +79,67 @@ class StashService {
     throw StashException('Articles from ${uri.host} are not supported yet.');
   }
 
+  /// Downloads one feed [entry] for offline reading and caches it on the
+  /// feed.
+  ///
+  /// The parsed article is attached to the entry itself, so the library
+  /// gains nothing new. An entry that is already cached returns its
+  /// article without touching the network. A failed download throws the
+  /// user-facing failure and caches nothing.
+  Future<Article> fetchEntryArticle(StashItem feed, StashEntry entry) async {
+    if (entry.article != null) return entry.article!;
+
+    final link = entry.link?.trim();
+    if (link == null || link.isEmpty) {
+      throw const StashException('This entry has no link to download.');
+    }
+    if (!isSupportedArticleHost(link)) {
+      throw StashException(
+        'Articles from ${domainOf(link)} are not supported yet.',
+      );
+    }
+
+    final uri = Uri.parse(link);
+    final body = await _fetch(uri);
+
+    final Article article;
+    try {
+      article = _adapterFor(uri).parse(body, uri: uri);
+    } on ArticleParseException catch (error) {
+      throw StashException(error.message);
+    }
+
+    final entries =
+        feed.entries
+            .map(
+              (candidate) =>
+                  identical(candidate, entry)
+                      ? StashEntry(
+                        title: candidate.title,
+                        link: candidate.link,
+                        summary: candidate.summary,
+                        publishedAt: candidate.publishedAt,
+                        article: article,
+                      )
+                      : candidate,
+            )
+            .toList();
+    final updated = StashItem(
+      id: feed.id,
+      url: feed.url,
+      title: feed.title,
+      domain: feed.domain,
+      savedAt: feed.savedAt,
+      isFeed: true,
+      entries: entries,
+    );
+    _items.value = [
+      for (final item in _items.peek())
+        if (item.id == feed.id) updated else item,
+    ];
+    return article;
+  }
+
   Future<StashItem> _stashFeed(String raw) async {
     final uri = Uri.parse(raw);
     final body = await _fetch(uri);

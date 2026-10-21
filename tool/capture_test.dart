@@ -17,6 +17,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/screens/feed_screen.dart';
+import 'package:stashify/services/stash_service.dart';
 import 'package:stashify/widgets/stash_row.dart';
 
 const _fontDirs = [
@@ -89,6 +90,14 @@ StashItem _feed() => StashItem(
       ],
     );
 
+/// A feed screen backed by a seeded service, so the rows can read states.
+FeedScreen _feedScreen() {
+  final feed = _feed();
+  final service = StashService();
+  service.restore(feed, 0);
+  return FeedScreen(feed: feed, service: service);
+}
+
 Future<void> _capture(WidgetTester tester, String name) async {
   final boundary = tester.renderObject<RenderRepaintBoundary>(
     find.byKey(const ValueKey('capture')),
@@ -128,7 +137,7 @@ void main() {
       _app(
         RepaintBoundary(
           key: const ValueKey('capture'),
-          child: FeedScreen(feed: _feed()),
+          child: _feedScreen(),
         ),
       ),
     );
@@ -150,7 +159,7 @@ void main() {
       _app(
         RepaintBoundary(
           key: const ValueKey('capture'),
-          child: FeedScreen(feed: _feed()),
+          child: _feedScreen(),
         ),
         brightness: Brightness.dark,
       ),

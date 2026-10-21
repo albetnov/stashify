@@ -4,6 +4,7 @@ import 'package:flutter_test/flutter_test.dart';
 
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/screens/feed_screen.dart';
+import 'package:stashify/services/stash_service.dart';
 
 StashItem _feed({List<StashEntry> entries = const []}) => StashItem(
       id: 's1',
@@ -28,7 +29,11 @@ List<StashEntry> _entries() => [
       ),
     ];
 
-Widget _screen(StashItem feed) => MaterialApp(home: FeedScreen(feed: feed));
+Widget _screen(StashItem feed) {
+  final service = StashService();
+  service.restore(feed, 0);
+  return MaterialApp(home: FeedScreen(feed: feed, service: service));
+}
 
 void main() {
   testWidgets('The screen lists the entries of the feed',
@@ -41,20 +46,20 @@ void main() {
     expect(find.text('2h ago'), findsOneWidget);
     expect(find.text('Why offline still wins'), findsOneWidget);
     expect(find.text('Second entry'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'Read'), findsNWidgets(2));
+    // example.com has no article adapter, so neither entry can download.
+    expect(find.text('Not supported'), findsNWidgets(2));
+    expect(find.widgetWithText(TextButton, 'Read'), findsNothing);
   });
 
-  testWidgets('Read opens the entry, and says the reader is not ready',
+  testWidgets('An entry with no readable link explains itself',
       (WidgetTester tester) async {
     await tester.pumpWidget(_screen(_feed(entries: _entries())));
 
-    await tester.tap(find.widgetWithText(TextButton, 'Read').first);
+    await tester.tap(find.text('Not supported').first);
     await tester.pumpAndSettle();
 
     expect(
-      find.text(
-        'Reading offline isn’t ready yet. This entry is stashed and waiting.',
-      ),
+      find.textContaining('Articles from example.com aren’t supported yet.'),
       findsOneWidget,
     );
     expect(find.text('example.com · 2h ago'), findsOneWidget);
@@ -86,7 +91,7 @@ void main() {
     );
 
     expect(find.text('Reading on the train'), findsOneWidget);
-    expect(find.widgetWithText(TextButton, 'Read'), findsNWidgets(2));
+    expect(find.text('Not supported'), findsNWidgets(2));
   });
 
   testWidgets('The screen holds up at a large font scale',

@@ -2,7 +2,7 @@
 version: 1
 slug: "lib-screens-feed-screen-dart"
 primary_target: "lib/screens/feed_screen.dart"
-related_targets: []
+related_targets: ["lib/widgets/feed_entry_row.dart","lib/services/stash_service.dart"]
 ---
 
 # Feed entries screen
@@ -18,10 +18,11 @@ find something to read offline and is scanning a list to choose it.
 - Action: tap Read on an entry.
 - Content: real entry titles, publish times and summaries, parsed from the
   stashed feed.
-- Constraints: everything is in memory for now (no persistence yet); the
-  reader screen itself is a later pass, so Read opens an honest placeholder.
+- Constraints: everything is in memory for now (no persistence yet); entry
+  bodies are cached on the feed itself, so downloading one adds nothing to
+  the library.
 - Unresolved: read/unread state is out of scope (PRODUCT.md leaves it
-  undecided); entry bodies are not stored yet.
+  undecided).
 
 ## Direction contract
 
@@ -29,7 +30,10 @@ THESIS: A stashed feed is only useful if its contents are legible. The screen
 exists to let the visitor pick one entry to read, so the entries are the
 screen and the chrome is one line. It refuses the subscription-dashboard
 arrangement — no folders, no unread counters, no feed chrome — because the
-stash is a shelf of things to read, not an inbox.
+stash is a shelf of things to read, not an inbox. One control per entry:
+Read downloads a readable entry on first tap and opens it after, opens a
+cached entry at once with the offline mark beside it, and an entry with no
+readable link honestly says Not supported instead of Read.
 
 OWN-WORLD: The app's settled world: the green-seeded Material 3 scheme
 (#0B6B4F), surfaceContainerHigh cards in the library, the M3 type scale

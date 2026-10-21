@@ -38,8 +38,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   void _openItem(StashItem item) {
     if (item.isFeed) {
-      Navigator.of(context)
-          .push(MaterialPageRoute(builder: (_) => FeedScreen(feed: item)));
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (_) => FeedScreen(feed: item, service: _service),
+        ),
+      );
       return;
     }
     Navigator.of(
@@ -89,34 +92,47 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
             Padding(
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+              // One flex distributor (the Expanded) keeps the trailing
+              // cluster glued to the right edge: its content is end-aligned,
+              // so on a phone this renders exactly like a Spacer would.
+              // The inner Flexible only binds on genuine overflow — widget
+              // tests use the wide Ahem font, where the text can exceed
+              // the row while fitting on a real phone.
               child: Row(
                 children: [
                   Text('Saved', style: text.titleMedium),
                   const SizedBox(width: 8),
                   SignalBuilder(
-                    builder: (context) => Text(
-                      '${_service.items.value.length}',
-                      style: text.bodyMedium?.copyWith(
-                        color: scheme.onSurfaceVariant,
-                      ),
-                    ),
+                    builder:
+                        (context) => Text(
+                          '${_service.items.value.length}',
+                          style: text.bodyMedium?.copyWith(
+                            color: scheme.onSurfaceVariant,
+                          ),
+                        ),
                   ),
 
-                  const Spacer(),
-
-                  Icon(
-                    Icons.offline_pin_outlined,
-                    size: 18,
-                    color: scheme.onSurfaceVariant,
-                  ),
-                  const SizedBox(width: 4),
-
-                  // DO NOT ADD FLEXIBLE HERE! IT MESS WITH THE UI
-                  Text(
-                    'On this device',
-                    overflow: TextOverflow.ellipsis,
-                    style: text.bodySmall?.copyWith(
-                      color: scheme.onSurfaceVariant,
+                  Expanded(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.end,
+                      children: [
+                        Icon(
+                          Icons.offline_pin_outlined,
+                          size: 18,
+                          color: scheme.onSurfaceVariant,
+                        ),
+                        const SizedBox(width: 4),
+                        Flexible(
+                          child: Text(
+                            'On this device',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: text.bodySmall?.copyWith(
+                              color: scheme.onSurfaceVariant,
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
                 ],

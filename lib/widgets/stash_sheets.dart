@@ -39,14 +39,23 @@ Future<void> showSupportedSheet(BuildContext context) {
   );
 }
 
-/// One entry of a stashed feed, on its way to being read.
+/// One entry of a stashed feed that cannot be read offline.
+///
+/// The entry's link points at a site with no article adapter, or it has no
+/// link at all. The sheet names the problem instead of promising a read.
 Future<void> showEntrySheet(BuildContext context, StashEntry entry) {
-  final domain = entry.link == null ? '' : domainOf(entry.link!);
+  final link = entry.link?.trim() ?? '';
+  final domain = link.isEmpty ? '' : domainOf(link);
   final published = entryTime(entry.publishedAt);
   final meta = [
     if (domain.isNotEmpty) domain,
     if (published.isNotEmpty) published,
   ].join(' · ');
+  final body =
+      domain.isEmpty
+          ? 'This entry has no link to download.'
+          : 'Articles from $domain aren’t supported yet. Stashify can '
+              'read articles from ${supportedArticleHosts.join(', ')}.';
 
   return showModalBottomSheet<void>(
     context: context,
@@ -61,18 +70,17 @@ Future<void> showEntrySheet(BuildContext context, StashEntry entry) {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(entry.title, style: theme.textTheme.headlineSmall),
-              const SizedBox(height: 8),
-              Text(
-                meta,
-                style: theme.textTheme.bodyMedium
-                    ?.copyWith(color: theme.colorScheme.onSurfaceVariant),
-              ),
+              if (meta.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                Text(
+                  meta,
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: theme.colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
               const SizedBox(height: 16),
-              Text(
-                'Reading offline isn’t ready yet. This entry is stashed and '
-                'waiting.',
-                style: theme.textTheme.bodyLarge,
-              ),
+              Text(body, style: theme.textTheme.bodyLarge),
             ],
           ),
         ),

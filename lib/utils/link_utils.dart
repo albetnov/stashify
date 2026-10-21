@@ -54,6 +54,27 @@ String domainOf(String raw) {
   return uri.host.replaceFirst(RegExp(r'^www\.'), '');
 }
 
+/// Whether [raw] points at a host with an article adapter.
+///
+/// Unlike [supportFor], this is a host check only: feed-entry links are
+/// article links, never stash inputs, so feed-sniffing must not apply.
+bool isSupportedArticleHost(
+  String raw, {
+  Set<String> articleHosts = supportedArticleHosts,
+}) {
+  final uri = Uri.tryParse(raw.trim());
+  if (uri == null ||
+      !(uri.scheme == 'http' || uri.scheme == 'https') ||
+      uri.host.isEmpty ||
+      !uri.host.contains('.')) {
+    return false;
+  }
+  final host = domainOf(raw);
+  return articleHosts.any(
+    (allowed) => host == allowed || host.endsWith('.$allowed'),
+  );
+}
+
 String timeAgo(DateTime t) {
   final diff = DateTime.now().difference(t);
   if (diff.inMinutes < 1) return 'just now';

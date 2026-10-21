@@ -20,12 +20,19 @@ class StashEntry {
     this.link,
     this.summary,
     this.publishedAt,
+    this.article,
   });
 
   final String title;
   final String? link;
   final String? summary;
   final DateTime? publishedAt;
+
+  /// The downloaded body, null until the entry is read offline.
+  ///
+  /// Entries are cached on the feed itself: downloading one never adds a
+  /// new item to the library.
+  final Article? article;
 }
 
 class StashItem {
