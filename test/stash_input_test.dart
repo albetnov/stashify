@@ -117,7 +117,8 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('What stashes well'), findsOneWidget);
-    expect(find.text('Not yet — no sites are supported.'), findsOneWidget);
+    expect(find.text('These sites are supported: albetnv.dev.'),
+        findsOneWidget);
   });
 
   testWidgets('The button is pending while the write runs',

@@ -5,9 +5,9 @@ import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/services/service_locator.dart';
 import 'package:stashify/services/stash_service.dart';
 import 'package:stashify/screens/feed_screen.dart';
+import 'package:stashify/screens/reader_screen.dart';
 import 'package:stashify/widgets/empty_state.dart';
 import 'package:stashify/widgets/stash_row.dart';
-import 'package:stashify/widgets/stash_sheets.dart';
 import 'package:stashify/widgets/stash_shell.dart';
 
 class HomeScreen extends StatefulWidget {
@@ -42,7 +42,9 @@ class _HomeScreenState extends State<HomeScreen> {
           .push(MaterialPageRoute(builder: (_) => FeedScreen(feed: item)));
       return;
     }
-    showReaderSheet(context, item);
+    Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => ReaderScreen(item: item)));
   }
 
   @override
@@ -109,7 +111,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                   const SizedBox(width: 4),
 
-                  // DO NOT ADD FLEXIBLE HERE! IT MESS THE DESIGN
+                  // DO NOT ADD FLEXIBLE HERE! IT MESS WITH THE UI
                   Text(
                     'On this device',
                     overflow: TextOverflow.ellipsis,

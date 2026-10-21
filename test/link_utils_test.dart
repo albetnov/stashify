@@ -53,7 +53,14 @@ void main() {
     expect(supportFor(''), StashSupport.none);
   });
 
-  test('no article site is supported yet', () {
+  test('an article on albetnv.dev is supported', () {
+    expect(
+      supportFor('https://albetnv.dev/blog/story'),
+      StashSupport.supportedArticle,
+    );
+  });
+
+  test('a site without an adapter is not supported', () {
     expect(supportFor('https://example.com/some/article'),
         StashSupport.unsupportedArticle);
   });

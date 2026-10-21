@@ -42,7 +42,7 @@ StashService serviceServing(
       return http.Response(
         body,
         status,
-        headers: {'content-type': 'application/rss+xml'},
+        headers: {'content-type': 'application/rss+xml; charset=utf-8'},
       );
     }),
   );

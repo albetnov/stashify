@@ -18,8 +18,8 @@ enum StashSupport {
 /// What [raw] is, and whether it can be stashed.
 ///
 /// Feeds are always stashed. An article is stashed only when its host is in
-/// [articleHosts]; [supportedArticleHosts] is the app's list, and it is
-/// empty until the article parser lands.
+/// [articleHosts]; [supportedArticleHosts] is the app's list of sites with an
+/// adapter.
 StashSupport supportFor(
   String raw, {
   Set<String> articleHosts = supportedArticleHosts,

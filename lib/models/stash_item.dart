@@ -1,3 +1,5 @@
+import 'package:stashify/models/article.dart';
+
 /// Thrown when a stash write fails.
 ///
 /// The write that throws it adds nothing to the stash: the card tells the
@@ -36,6 +38,7 @@ class StashItem {
     this.isFeed = false,
     this.readMinutes = 0,
     this.entries = const [],
+    this.article,
   });
 
   final String id;
@@ -48,4 +51,7 @@ class StashItem {
 
   /// The entries of a stashed feed, empty for an article.
   final List<StashEntry> entries;
+
+  /// The parsed body of a stashed article, null for a feed.
+  final Article? article;
 }

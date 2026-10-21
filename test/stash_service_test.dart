@@ -1,8 +1,11 @@
 // The stash service on its own: it fetches a feed and keeps it in memory.
+import 'dart:io';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'package:stashify/models/article.dart';
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/services/stash_service.dart';
 
@@ -114,6 +117,62 @@ void main() {
           (e) => e.message,
           'message',
           contains('not supported'),
+        ),
+      ),
+    );
+    expect(service.items.value, isEmpty);
+  });
+
+  test('an article on a supported site is stashed with its body', () async {
+    final service = serviceServing('''
+<html><body><article>
+<header>
+  <h1>A stashed article</h1>
+  <img src="https://example.com/cover.jpg" alt="Cover">
+</header>
+<div id="blog-content">
+  <p>Read me offline.</p>
+</div>
+</article></body></html>
+''');
+
+    final item = await service.stash('https://albetnv.dev/blog/story');
+
+    expect(item.isFeed, isFalse);
+    expect(item.title, 'A stashed article');
+    expect(item.domain, 'albetnv.dev');
+    expect(item.readMinutes, 1);
+    expect(item.article, isNotNull);
+    expect(item.article!.coverImageUrl, 'https://example.com/cover.jpg');
+    expect(item.article!.blocks.single, isA<ArticleParagraph>());
+    expect(service.items.value, [item]);
+  });
+
+  test('the saved albetnv.dev page is stashed as an article', () async {
+    final golden = File('test/fixtures/golden.html').readAsStringSync();
+    final service = serviceServing(golden);
+
+    final item = await service.stash(
+      'https://albetnv.dev/blog/'
+      'validasi-v1-rc-released-with-performance-improvement/',
+    );
+
+    expect(item.isFeed, isFalse);
+    expect(item.article, isNotNull);
+    expect(item.article!.blocks, isNotEmpty);
+    expect(item.readMinutes, greaterThan(1));
+  });
+
+  test('an article with no readable body fails the stash', () async {
+    final service = serviceServing('<html><body>Nothing here.</body></html>');
+
+    await expectLater(
+      service.stash('https://albetnv.dev/blog/empty'),
+      throwsA(
+        isA<StashException>().having(
+          (e) => e.message,
+          'message',
+          contains('no readable article'),
         ),
       ),
     );

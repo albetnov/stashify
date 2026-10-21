@@ -4,13 +4,19 @@ import 'package:http/http.dart' as http;
 import 'package:rss_dart/dart_rss.dart';
 import 'package:signals/signals.dart';
 
+import 'package:stashify/models/article.dart';
 import 'package:stashify/models/stash_item.dart';
+import 'package:stashify/services/albetnv_adapter.dart';
+import 'package:stashify/services/article_adapter.dart';
 import 'package:stashify/utils/link_utils.dart';
 
 class StashService {
-  StashService({http.Client? client}) : _client = client ?? http.Client();
+  StashService({http.Client? client, List<ArticleAdapter>? adapters})
+    : _client = client ?? http.Client(),
+      _adapters = adapters ?? const [AlbetnvAdapter()];
 
   final http.Client _client;
+  final List<ArticleAdapter> _adapters;
   final Signal<List<StashItem>> _items = signal([]);
 
   static const _timeout = Duration(seconds: 15);
@@ -34,35 +40,52 @@ class StashService {
           'Articles from ${domainOf(raw)} are not supported yet.',
         );
       case StashSupport.supportedArticle:
-        throw UnimplementedError('The article parser is not built yet.');
+        return _stashArticle(raw);
       case StashSupport.feed:
         return _stashFeed(raw);
     }
   }
 
+  Future<StashItem> _stashArticle(String raw) async {
+    final uri = Uri.parse(raw);
+    final adapter = _adapterFor(uri);
+    final body = await _fetch(uri);
+
+    final Article article;
+    try {
+      article = adapter.parse(body, uri: uri);
+    } on ArticleParseException catch (error) {
+      throw StashException(error.message);
+    }
+
+    final item = StashItem(
+      id: 's${DateTime.now().microsecondsSinceEpoch}',
+      url: raw,
+      title: article.title,
+      domain: domainOf(raw),
+      savedAt: DateTime.now(),
+      readMinutes: article.readMinutes,
+      article: article,
+    );
+
+    _items.value = [item, ..._items.peek()];
+    return item;
+  }
+
+  ArticleAdapter _adapterFor(Uri uri) {
+    for (final adapter in _adapters) {
+      if (adapter.handles(uri)) return adapter;
+    }
+    throw StashException('Articles from ${uri.host} are not supported yet.');
+  }
+
   Future<StashItem> _stashFeed(String raw) async {
     final uri = Uri.parse(raw);
-
-    final http.Response response;
-    try {
-      response = await _client
-          .get(uri, headers: {'user-agent': _userAgent})
-          .timeout(_timeout);
-    } catch (_) {
-      throw StashException('Could not reach ${uri.host}.');
-    }
-
-    if (response.statusCode != 200) {
-      throw StashException(
-        'Could not fetch ${uri.host} (${response.statusCode}).',
-      );
-    }
+    final body = await _fetch(uri);
 
     final RssFeed feed;
     try {
-      feed = RssFeed.parse(
-        utf8.decode(response.bodyBytes, allowMalformed: true),
-      );
+      feed = RssFeed.parse(body);
     } catch (_) {
       throw const StashException('That link is not a feed.');
     }
@@ -80,6 +103,26 @@ class StashService {
 
     _items.value = [item, ..._items.peek()];
     return item;
+  }
+
+  /// Fetches [uri] and returns its body, or throws the user-facing failure.
+  Future<String> _fetch(Uri uri) async {
+    final http.Response response;
+    try {
+      response = await _client
+          .get(uri, headers: {'user-agent': _userAgent})
+          .timeout(_timeout);
+    } catch (_) {
+      throw StashException('Could not reach ${uri.host}.');
+    }
+
+    if (response.statusCode != 200) {
+      throw StashException(
+        'Could not fetch ${uri.host} (${response.statusCode}).',
+      );
+    }
+
+    return utf8.decode(response.bodyBytes, allowMalformed: true);
   }
 
   /// Takes [item] out of the stash.
