@@ -173,15 +173,7 @@ class _Action extends StatelessWidget {
           ),
         );
       case EntryReadState.downloadable || EntryReadState.browser:
-        return TextButton(
-          onPressed: onRead,
-          style: TextButton.styleFrom(
-            // The label ends where the rule above it ends.
-            padding: const EdgeInsets.only(left: 12),
-            minimumSize: const Size(48, 48),
-          ),
-          child: const Text('Read'),
-        );
+        return TextButton(onPressed: onRead, child: const Text('Read'));
     }
   }
 }
