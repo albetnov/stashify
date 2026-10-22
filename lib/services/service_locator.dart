@@ -32,3 +32,21 @@ void setupServices() {
     () => StashService(client: getIt<http.Client>()),
   );
 }
+
+/// Async entry point for app startup.
+///
+/// Registers everything [setupServices] does, then opens the database,
+/// migrates it, and preloads the library. The store is in-memory for now,
+/// so this only yields to let the splash paint; the persistence steps slot
+/// in here without touching the UI.
+///
+/// [offline] skips persistence once it lands: the app runs memory-only for
+/// the session.
+Future<void> setupServicesAsync({bool offline = false}) async {
+  setupServices();
+  if (!offline) {
+    // Database open, migrate, and preload land here.
+  }
+  // Yield so the splash paints at least one frame before home.
+  await Future<void>.delayed(Duration.zero);
+}

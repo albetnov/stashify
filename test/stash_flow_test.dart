@@ -24,6 +24,7 @@ void main() {
   testWidgets('Feed URL activates chip and stashes with progress',
       (WidgetTester tester) async {
     await tester.pumpWidget(const StashifyApp());
+    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.widgetWithText(TextField, 'Paste article or feed URL'),
@@ -46,6 +47,7 @@ void main() {
   testWidgets('Tapping a stashed feed opens its entries',
       (WidgetTester tester) async {
     await tester.pumpWidget(const StashifyApp());
+    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.widgetWithText(TextField, 'Paste article or feed URL'),
@@ -66,6 +68,7 @@ void main() {
 
   testWidgets('Invalid URL shows an inline error', (WidgetTester tester) async {
     await tester.pumpWidget(const StashifyApp());
+    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.widgetWithText(TextField, 'Paste article or feed URL'),

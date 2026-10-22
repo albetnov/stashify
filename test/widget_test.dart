@@ -9,6 +9,7 @@ void main() {
   testWidgets('Home screen shows stash input and an empty stash',
       (WidgetTester tester) async {
     await tester.pumpWidget(const StashifyApp());
+    await tester.pumpAndSettle();
 
     expect(find.text('Stashify'), findsOneWidget);
     expect(find.text('Save for offline reading'), findsOneWidget);

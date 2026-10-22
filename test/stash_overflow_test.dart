@@ -33,6 +33,7 @@ void main() {
         child: StashifyApp(),
       ),
     );
+    await tester.pumpAndSettle();
 
     await tester.enterText(
       find.widgetWithText(TextField, 'Paste article or feed URL'),
