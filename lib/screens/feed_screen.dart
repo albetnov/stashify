@@ -75,7 +75,11 @@ class _FeedScreenState extends State<FeedScreen> {
   }
 
   EntryReadState _stateOf(StashEntry entry) {
-    if (entry.article != null) return EntryReadState.downloaded;
+    // A cached body never turns an unsupported host into a readable article.
+    if (entry.article != null &&
+        isSupportedArticleHost(entry.link ?? '')) {
+      return EntryReadState.downloaded;
+    }
     final link = entry.link?.trim() ?? '';
     final uri = Uri.tryParse(link);
     final openable =
@@ -90,6 +94,29 @@ class _FeedScreenState extends State<FeedScreen> {
   Future<void> _onRead(StashItem feed, StashEntry entry) async {
     switch (_stateOf(entry)) {
       case EntryReadState.downloaded:
+        if (!isSupportedArticleHost(entry.link ?? '')) {
+          // Stale cache on an unsupported host: open the live page instead.
+          final link = entry.link?.trim() ?? '';
+          final uri = Uri.tryParse(link);
+          if (uri == null || uri.host.isEmpty) {
+            showEntrySheet(context, entry);
+            return;
+          }
+          if (!await widget.isOnline()) {
+            if (!mounted) return;
+            ScaffoldMessenger.of(context)
+              ..clearSnackBars()
+              ..showSnackBar(
+                const SnackBar(
+                  content: Text('Needs a connection to open this entry.'),
+                ),
+              );
+            return;
+          }
+          if (!mounted) return;
+          widget.openBrowser(context, uri);
+          return;
+        }
         _openArticle(feed, entry, entry.article!);
       case EntryReadState.downloading:
         break;
