@@ -67,123 +67,143 @@ class _HomeScreenState extends State<HomeScreen> {
         ],
       ),
       body: SafeArea(
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: Text(
-                'Save for offline reading',
-                style: text.headlineSmall,
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
-              child: Text(
-                'Paste a link while online. It stays on this device.',
-                style: text.bodyMedium?.copyWith(
-                  color: scheme.onSurfaceVariant,
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
-              child: StashShell(service: _service),
-            ),
-            Padding(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
-              // One flex distributor (the Expanded) keeps the trailing
-              // cluster glued to the right edge: its content is end-aligned,
-              // so on a phone this renders exactly like a Spacer would.
-              // The inner Flexible only binds on genuine overflow — widget
-              // tests use the wide Ahem font, where the text can exceed
-              // the row while fitting on a real phone.
-              child: Row(
-                children: [
-                  Text('Saved', style: text.titleMedium),
-                  const SizedBox(width: 8),
-                  SignalBuilder(
-                    builder:
-                        (context) => Text(
-                          '${_service.items.value.length}',
-                          style: text.bodyMedium?.copyWith(
-                            color: scheme.onSurfaceVariant,
-                          ),
-                        ),
-                  ),
-
-                  Expanded(
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.end,
-                      children: [
-                        Icon(
-                          Icons.offline_pin_outlined,
-                          size: 18,
-                          color: scheme.onSurfaceVariant,
-                        ),
-                        const SizedBox(width: 4),
-                        Flexible(
-                          child: Text(
-                            'On this device',
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: text.bodySmall?.copyWith(
-                              color: scheme.onSurfaceVariant,
-                            ),
-                          ),
-                        ),
-                      ],
+        // The whole body scrolls as one: at a large text scale the intro
+        // copy and the card grow together instead of pushing a fixed
+        // header past the viewport.
+        child: SignalBuilder(
+          builder: (context) {
+            final items = _service.items.value;
+            return CustomScrollView(
+              slivers: [
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: Text(
+                      'Save for offline reading',
+                      style: text.headlineSmall,
                     ),
                   ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: SignalBuilder(
-                builder: (context) {
-                  final items = _service.items.value;
-                  return items.isEmpty
-                      ? const EmptyState(
-                          title: 'Nothing stashed yet',
-                          body:
-                              'Paste your first link above. It will appear '
-                              'here and stay readable offline.',
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+                    child: Text(
+                      'Paste a link while online. It stays on this device.',
+                      style: text.bodyMedium?.copyWith(
+                        color: scheme.onSurfaceVariant,
+                      ),
+                    ),
+                  ),
+                ),
+                SliverToBoxAdapter(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    child: StashShell(service: _service),
+                  ),
+                ),
+                SliverToBoxAdapter(child: _savedHeader(items.length)),
+                      if (items.isEmpty)
+                        const SliverFillRemaining(
+                          hasScrollBody: false,
+                          child: EmptyState(
+                            title: 'Nothing stashed yet',
+                            body:
+                                'Paste your first link above. It will appear '
+                                'here and stay readable offline.',
+                          ),
                         )
-                      : ListView.separated(
+                      else
+                        SliverPadding(
                           padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                          itemCount: items.length,
-                          separatorBuilder: (_, _) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final item = items[index];
-                            return Dismissible(
-                              key: ValueKey(item.id),
-                              direction: DismissDirection.endToStart,
-                              background: Container(
-                                alignment: Alignment.centerRight,
-                                padding: const EdgeInsets.only(right: 20),
-                                decoration: BoxDecoration(
-                                  color: scheme.errorContainer,
-                                  borderRadius: BorderRadius.circular(12),
+                          sliver: SliverList.separated(
+                            itemCount: items.length,
+                            separatorBuilder:
+                                (_, _) => const SizedBox(height: 8),
+                            itemBuilder: (context, index) {
+                              final item = items[index];
+                              return Dismissible(
+                                key: ValueKey(item.id),
+                                direction: DismissDirection.endToStart,
+                                background: Container(
+                                  alignment: Alignment.centerRight,
+                                  padding: const EdgeInsets.only(right: 20),
+                                  decoration: BoxDecoration(
+                                    color: scheme.errorContainer,
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: Icon(
+                                    Icons.delete_outline,
+                                    color: scheme.onErrorContainer,
+                                  ),
                                 ),
-                                child: Icon(
-                                  Icons.delete_outline,
-                                  color: scheme.onErrorContainer,
+                                onDismissed: (_) => _remove(item),
+                                child: StashRow(
+                                  item: item,
+                                  onOpen: () => _openItem(item),
+                                  onDelete: () => _remove(item),
                                 ),
-                              ),
-                              onDismissed: (_) => _remove(item),
-                              child: StashRow(
-                                item: item,
-                                onOpen: () => _openItem(item),
-                                onDelete: () => _remove(item),
-                              ),
-                            );
-                          },
-                        );
+                              );
+                            },
+                          ),
+                        ),
+                    ],
+                  );
                 },
               ),
             ),
-          ],
-        ),
+        );
+  }
+
+  /// The "Saved N · On this device" row above the library list.
+  ///
+  /// It lives in a sliver so the whole body scrolls as one: at a large
+  /// text scale nothing fixed can be pushed past the viewport.
+  // One flex distributor (the Expanded) keeps the trailing
+  // cluster glued to the right edge: its content is end-aligned,
+  // so on a phone this renders exactly like a Spacer would.
+  // The inner Flexible only binds on genuine overflow — widget
+  // tests use the wide Ahem font, where the text can exceed
+  // the row while fitting on a real phone.
+  Widget _savedHeader(int count) {
+    final scheme = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 16, 16, 4),
+      child: Row(
+        children: [
+          Text('Saved', style: text.titleMedium),
+          const SizedBox(width: 8),
+          Text(
+            '$count',
+            style: text.bodyMedium?.copyWith(
+              color: scheme.onSurfaceVariant,
+            ),
+          ),
+
+          Expanded(
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.end,
+              children: [
+                Icon(
+                  Icons.offline_pin_outlined,
+                  size: 18,
+                  color: scheme.onSurfaceVariant,
+                ),
+                const SizedBox(width: 4),
+                Flexible(
+                  child: Text(
+                    'On this device',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: text.bodySmall?.copyWith(
+                      color: scheme.onSurfaceVariant,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }

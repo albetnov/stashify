@@ -47,4 +47,33 @@ void main() {
 
     expect(find.textContaining('Stashify Weekly'), findsOneWidget);
   });
+
+  testWidgets('Home screen does not overflow on small screen, huge text',
+      (WidgetTester tester) async {
+    tester.view.physicalSize = const Size(720, 1280);
+    tester.view.devicePixelRatio = 2.0; // 360x640 logical
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+
+    await tester.pumpWidget(
+      const MediaQuery(
+        data: MediaQueryData(textScaler: TextScaler.linear(2.0)),
+        child: StashifyApp(),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    // The header fits; the rest scrolls. The framework fails the test on
+    // any overflow, so reaching the empty state proves the layout holds.
+    expect(find.text('Save for offline reading'), findsOneWidget);
+    for (
+      var i = 0;
+      i < 10 && find.text('Nothing stashed yet').evaluate().isEmpty;
+      i++
+    ) {
+      await tester.drag(find.byType(CustomScrollView), const Offset(0, -300));
+      await tester.pumpAndSettle();
+    }
+    expect(find.text('Nothing stashed yet'), findsOneWidget);
+  });
 }
