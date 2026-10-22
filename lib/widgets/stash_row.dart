@@ -63,7 +63,8 @@ class StashRow extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: 8),
-              Icon(Icons.offline_pin_outlined, color: scheme.primary),
+              if (item.isFeed || item.article != null)
+                Icon(Icons.offline_pin_outlined, color: scheme.primary),
             ],
           ),
         ),

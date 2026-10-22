@@ -107,6 +107,18 @@ class _FeedScreenState extends State<FeedScreen> {
         if (!mounted) return;
         widget.openBrowser(context, uri);
       case EntryReadState.unsupported:
+        if (!await widget.isOnline()) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Needs a connection to open this entry.'),
+              ),
+            );
+          return;
+        }
+        if (!mounted) return;
         showEntrySheet(context, entry);
       case EntryReadState.downloadable:
         // Runs inside a FeedEntryDownloadRow, which owns the fetch.
