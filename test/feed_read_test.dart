@@ -43,8 +43,19 @@ StashService _serviceServing(
   );
 }
 
-Widget _screen(StashItem feed, StashService service) =>
-    MaterialApp(home: FeedScreen(feed: feed, service: service));
+Widget _screen(
+  StashItem feed,
+  StashService service, {
+  OpenBrowser? openBrowser,
+  Future<bool> Function()? isOnline,
+}) => MaterialApp(
+  home: FeedScreen(
+    feed: feed,
+    service: service,
+    openBrowser: openBrowser ?? (_, _) {},
+    isOnline: isOnline ?? () async => true,
+  ),
+);
 
 StashItem _seed(StashService service, List<StashEntry> entries) {
   final feed = _feed(entries: entries);
@@ -139,7 +150,37 @@ void main() {
     expect(find.byIcon(Icons.offline_pin_outlined), findsNothing);
   });
 
-  testWidgets('Entries without a readable link explain themselves', (
+  testWidgets('A linked entry opens its live page in the app browser', (
+    WidgetTester tester,
+  ) async {
+    final service = _serviceServing(_pageHtml);
+    final feed = _seed(service, [
+      StashEntry(
+        title: 'Elsewhere',
+        link: 'https://example.com/elsewhere',
+        publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
+      ),
+      const StashEntry(title: 'No link at all'),
+    ]);
+    final opened = <Uri>[];
+    await tester.pumpWidget(
+      _screen(feed, service, openBrowser: (_, url) => opened.add(url)),
+    );
+
+    // The linked entry reads live; the linkless one says so.
+    expect(find.widgetWithText(TextButton, 'Read'), findsOneWidget);
+    expect(find.text('Not supported'), findsOneWidget);
+
+    await tester.tap(find.widgetWithText(TextButton, 'Read'));
+    await tester.pumpAndSettle();
+    expect(opened, [Uri.parse('https://example.com/elsewhere')]);
+
+    await tester.tap(find.text('Not supported'));
+    await tester.pumpAndSettle();
+    expect(find.text('This entry has no link to open.'), findsOneWidget);
+  });
+
+  testWidgets('An offline tap explains instead of opening', (
     WidgetTester tester,
   ) async {
     final service = _serviceServing(_pageHtml);
@@ -148,25 +189,24 @@ void main() {
         title: 'Elsewhere',
         link: 'https://example.com/elsewhere',
       ),
-      const StashEntry(title: 'No link at all'),
     ]);
-    await tester.pumpWidget(_screen(feed, service));
-
-    expect(find.text('Not supported'), findsNWidgets(2));
-    expect(find.widgetWithText(TextButton, 'Read'), findsNothing);
-
-    await tester.tap(find.text('Not supported').first);
-    await tester.pumpAndSettle();
-    expect(
-      find.textContaining('Articles from example.com aren’t supported yet.'),
-      findsOneWidget,
+    var opened = 0;
+    await tester.pumpWidget(
+      _screen(
+        feed,
+        service,
+        openBrowser: (_, _) => opened++,
+        isOnline: () async => false,
+      ),
     );
 
-    // Sheets dismiss through the scrim, not the back button.
-    await tester.tapAt(const Offset(10, 10));
+    await tester.tap(find.widgetWithText(TextButton, 'Read'));
     await tester.pumpAndSettle();
-    await tester.tap(find.text('Not supported').last);
-    await tester.pumpAndSettle();
-    expect(find.text('This entry has no link to download.'), findsOneWidget);
+
+    expect(
+      find.text('Needs a connection to open the live page.'),
+      findsOneWidget,
+    );
+    expect(opened, 0);
   });
 }

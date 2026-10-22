@@ -14,7 +14,10 @@ enum EntryReadState {
   /// The body is cached: Read opens it with the offline mark beside it.
   downloaded,
 
-  /// The entry has no readable link: the row says so instead of Read.
+  /// The entry opens its live page in the app browser instead.
+  browser,
+
+  /// The entry has no openable link: the row says so instead of Read.
   unsupported,
 }
 
@@ -169,7 +172,7 @@ class _Action extends StatelessWidget {
             overflow: TextOverflow.ellipsis,
           ),
         );
-      case EntryReadState.downloadable:
+      case EntryReadState.downloadable || EntryReadState.browser:
         return TextButton(
           onPressed: onRead,
           style: TextButton.styleFrom(

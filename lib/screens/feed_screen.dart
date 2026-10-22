@@ -1,26 +1,60 @@
 import 'package:flutter/material.dart';
 import 'package:signals/signals_flutter.dart';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:stashify/models/article.dart';
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/screens/reader_screen.dart';
 import 'package:stashify/services/stash_service.dart';
+import 'package:stashify/utils/browser.dart';
 import 'package:stashify/utils/link_utils.dart';
 import 'package:stashify/widgets/empty_state.dart';
 import 'package:stashify/widgets/feed_entry_row.dart';
 import 'package:stashify/widgets/stash_sheets.dart';
 
+/// Opens [url] in the app browser.
+///
+/// A hook rather than a direct call so widget tests can record the routing
+/// without touching platform channels.
+typedef OpenBrowser = void Function(BuildContext context, Uri url);
+
+/// Whether the live page can be reached.
+///
+/// A hook so widget tests can answer without the platform plugin. A check
+/// that itself fails must not block reading.
+Future<bool> _checkOnline() async {
+  try {
+    final result = await Connectivity().checkConnectivity();
+    return !result.contains(ConnectivityResult.none);
+  } catch (_) {
+    return true;
+  }
+}
+
 /// The entries of a stashed feed.
 ///
 /// Each row carries one control. A downloadable entry fetches on the first
 /// tap and opens after it; a cached entry opens at once with the offline
-/// mark beside its Read; an entry with no readable link says so instead of
+/// mark beside its Read; any other linked entry opens its live page in the
+/// app browser; an entry with no openable link says so instead of
 /// promising a read.
 class FeedScreen extends StatefulWidget {
-  const FeedScreen({super.key, required this.feed, required this.service});
+  const FeedScreen({
+    super.key,
+    required this.feed,
+    required this.service,
+    this.openBrowser = openLivePage,
+    this.isOnline = _checkOnline,
+  });
 
   final StashItem feed;
   final StashService service;
+
+  /// Opens a live page. Tests inject a recorder here.
+  final OpenBrowser openBrowser;
+
+  /// Answers connectivity. Tests inject a fixed answer here.
+  final Future<bool> Function() isOnline;
 
   @override
   State<FeedScreen> createState() => _FeedScreenState();
@@ -41,10 +75,14 @@ class _FeedScreenState extends State<FeedScreen> {
     if (entry.article != null) return EntryReadState.downloaded;
     if (_downloading.contains(entry)) return EntryReadState.downloading;
     final link = entry.link?.trim() ?? '';
-    if (link.isNotEmpty && isSupportedArticleHost(link)) {
-      return EntryReadState.downloadable;
-    }
-    return EntryReadState.unsupported;
+    final uri = Uri.tryParse(link);
+    final openable =
+        uri != null &&
+        (uri.scheme == 'http' || uri.scheme == 'https') &&
+        uri.host.isNotEmpty;
+    if (!openable) return EntryReadState.unsupported;
+    if (isSupportedArticleHost(link)) return EntryReadState.downloadable;
+    return EntryReadState.browser;
   }
 
   Future<void> _onRead(StashItem feed, StashEntry entry) async {
@@ -53,6 +91,21 @@ class _FeedScreenState extends State<FeedScreen> {
         _openArticle(feed, entry, entry.article!);
       case EntryReadState.downloading:
         break;
+      case EntryReadState.browser:
+        final uri = Uri.parse(entry.link!.trim());
+        if (!await widget.isOnline()) {
+          if (!mounted) return;
+          ScaffoldMessenger.of(context)
+            ..clearSnackBars()
+            ..showSnackBar(
+              const SnackBar(
+                content: Text('Needs a connection to open the live page.'),
+              ),
+            );
+          return;
+        }
+        if (!mounted) return;
+        widget.openBrowser(context, uri);
       case EntryReadState.unsupported:
         showEntrySheet(context, entry);
       case EntryReadState.downloadable:

@@ -39,10 +39,10 @@ Future<void> showSupportedSheet(BuildContext context) {
   );
 }
 
-/// One entry of a stashed feed that cannot be read offline.
+/// One entry of a stashed feed that cannot be opened.
 ///
-/// The entry's link points at a site with no article adapter, or it has no
-/// link at all. The sheet names the problem instead of promising a read.
+/// The entry has no openable link. The sheet names the problem instead of
+/// promising a read.
 Future<void> showEntrySheet(BuildContext context, StashEntry entry) {
   final link = entry.link?.trim() ?? '';
   final domain = link.isEmpty ? '' : domainOf(link);
@@ -53,7 +53,7 @@ Future<void> showEntrySheet(BuildContext context, StashEntry entry) {
   ].join(' · ');
   final body =
       domain.isEmpty
-          ? 'This entry has no link to download.'
+          ? 'This entry has no link to open.'
           : 'Articles from $domain aren’t supported yet. Stashify can '
               'read articles from ${supportedArticleHosts.join(', ')}.';
 

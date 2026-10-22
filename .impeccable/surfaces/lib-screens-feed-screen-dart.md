@@ -2,7 +2,7 @@
 version: 1
 slug: "lib-screens-feed-screen-dart"
 primary_target: "lib/screens/feed_screen.dart"
-related_targets: ["lib/widgets/feed_entry_row.dart","lib/services/stash_service.dart"]
+related_targets: ["lib/widgets/feed_entry_row.dart","lib/services/stash_service.dart","lib/utils/browser.dart"]
 ---
 
 # Feed entries screen
@@ -20,7 +20,8 @@ find something to read offline and is scanning a list to choose it.
   stashed feed.
 - Constraints: everything is in memory for now (no persistence yet); entry
   bodies are cached on the feed itself, so downloading one adds nothing to
-  the library.
+  the library. Entries that open their live page need a connection — the
+  one deliberate exception to offline-first, checked before opening.
 - Unresolved: read/unread state is out of scope (PRODUCT.md leaves it
   undecided).
 
@@ -32,21 +33,26 @@ screen and the chrome is one line. It refuses the subscription-dashboard
 arrangement — no folders, no unread counters, no feed chrome — because the
 stash is a shelf of things to read, not an inbox. One control per entry:
 Read downloads a readable entry on first tap and opens it after, opens a
-cached entry at once with the offline mark beside it, and an entry with no
-readable link honestly says Not supported instead of Read.
+cached entry at once with the offline mark beside it, opens any other
+linked entry's live page in the system in-app browser, and an entry with
+no openable link honestly says Not supported instead of Read.
 
 OWN-WORLD: The app's settled world: the green-seeded Material 3 scheme
 (#0B6B4F), surfaceContainerHigh cards in the library, the M3 type scale
 (titleMedium titles, bodySmall and bodyMedium muted meta), 12–16px radii,
 hairline dividers, and the offline-pin motif. The screen inherits that
 scheme, that type scale, and the library's rhythm of a title followed by a
-muted meta line; muted text stays tinted from the scheme, never gray. No new
-palette, no new face, no new shape language.
+muted meta line; muted text stays tinted from the scheme, never gray. The
+live page opens in the system in-app browser rather than a hand-built one:
+Custom Tabs carries its own progress, errors, and history, and only its
+toolbar takes the scheme's surface. No new palette, no new face, no new
+shape language.
 
 STORY: The visitor stashed a feed; tapping it opens the entries it holds,
 newest first. Each entry shows what it is (title), when it was published,
 and enough of itself (a two-line summary) to recognise it without opening
-it. One control per entry starts reading it. The visitor leaves knowing:
+it. One control per entry starts reading it — offline when the page can be
+kept, live in the app browser when it cannot. The visitor leaves knowing:
 this feed is in my stash, this is what is in it, and reading is one tap away.
 
 FIRST VIEWPORT: The app bar carries the feed's identity — its title in the

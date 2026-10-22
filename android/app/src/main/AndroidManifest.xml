@@ -1,4 +1,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- The stash fetches feeds and articles, and the app browser loads
+         live pages. Debug builds get this free; release builds need it. -->
+    <uses-permission android:name="android.permission.INTERNET" />
     <application
         android:label="stashify"
         android:name="${applicationName}"

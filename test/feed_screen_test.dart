@@ -29,10 +29,21 @@ List<StashEntry> _entries() => [
       ),
     ];
 
-Widget _screen(StashItem feed) {
+Widget _screen(
+  StashItem feed, {
+  OpenBrowser? openBrowser,
+  Future<bool> Function()? isOnline,
+}) {
   final service = StashService();
   service.restore(feed, 0);
-  return MaterialApp(home: FeedScreen(feed: feed, service: service));
+  return MaterialApp(
+    home: FeedScreen(
+      feed: feed,
+      service: service,
+      openBrowser: openBrowser ?? (_, _) {},
+      isOnline: isOnline ?? () async => true,
+    ),
+  );
 }
 
 void main() {
@@ -46,23 +57,41 @@ void main() {
     expect(find.text('2h ago'), findsOneWidget);
     expect(find.text('Why offline still wins'), findsOneWidget);
     expect(find.text('Second entry'), findsOneWidget);
-    // example.com has no article adapter, so neither entry can download.
-    expect(find.text('Not supported'), findsNWidgets(2));
-    expect(find.widgetWithText(TextButton, 'Read'), findsNothing);
+    // example.com has no article adapter, so both entries open live.
+    expect(find.widgetWithText(TextButton, 'Read'), findsNWidgets(2));
+    expect(find.text('Not supported'), findsNothing);
   });
 
-  testWidgets('An entry with no readable link explains itself',
+  testWidgets('A linked entry opens its live page in the app browser',
       (WidgetTester tester) async {
-    await tester.pumpWidget(_screen(_feed(entries: _entries())));
+    final opened = <Uri>[];
+    await tester.pumpWidget(
+      _screen(
+        _feed(entries: _entries()),
+        openBrowser: (_, url) => opened.add(url),
+      ),
+    );
 
-    await tester.tap(find.text('Not supported').first);
+    await tester.tap(find.widgetWithText(TextButton, 'Read').first);
     await tester.pumpAndSettle();
 
-    expect(
-      find.textContaining('Articles from example.com aren’t supported yet.'),
-      findsOneWidget,
+    expect(opened, [Uri.parse('https://example.com/one')]);
+  });
+
+  testWidgets('An entry with no openable link explains itself',
+      (WidgetTester tester) async {
+    await tester.pumpWidget(
+      _screen(
+        _feed(
+          entries: const [StashEntry(title: 'No link at all')],
+        ),
+      ),
     );
-    expect(find.text('example.com · 2h ago'), findsOneWidget);
+
+    await tester.tap(find.text('Not supported'));
+    await tester.pumpAndSettle();
+
+    expect(find.text('This entry has no link to open.'), findsOneWidget);
   });
 
   testWidgets('A feed with nothing in it says so',
@@ -91,7 +120,7 @@ void main() {
     );
 
     expect(find.text('Reading on the train'), findsOneWidget);
-    expect(find.text('Not supported'), findsNWidgets(2));
+    expect(find.widgetWithText(TextButton, 'Read'), findsNWidgets(2));
   });
 
   testWidgets('The screen holds up at a large font scale',

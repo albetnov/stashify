@@ -41,6 +41,8 @@ dependencies:
   web: ^1.1.1
   rss_dart: ^1.0.14
   html: ^0.15.7
+  flutter_inappwebview: ^6.2.0-beta.3
+  connectivity_plus: ^7.3.2
 
 dev_dependencies:
   flutter_test:
