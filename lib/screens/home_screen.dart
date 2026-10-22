@@ -45,9 +45,8 @@ class _HomeScreenState extends State<HomeScreen> {
       );
       return;
     }
-    Navigator.of(
-      context,
-    ).push(MaterialPageRoute(builder: (_) => ReaderScreen(item: item)));
+    Navigator.of(context)
+        .push(MaterialPageRoute(builder: (_) => ReaderScreen(item: item)));
   }
 
   @override
@@ -102,68 +101,57 @@ class _HomeScreenState extends State<HomeScreen> {
                   ),
                 ),
                 SliverToBoxAdapter(child: _savedHeader(items.length)),
-                      if (items.isEmpty)
-                        const SliverFillRemaining(
-                          hasScrollBody: false,
-                          child: EmptyState(
-                            title: 'Nothing stashed yet',
-                            body:
-                                'Paste your first link above. It will appear '
-                                'here and stay readable offline.',
+                if (items.isEmpty)
+                  const SliverFillRemaining(
+                    hasScrollBody: false,
+                    child: EmptyState(
+                      title: 'Nothing stashed yet',
+                      body:
+                          'Paste your first link above. It will appear '
+                          'here and stay readable offline.',
+                    ),
+                  )
+                else
+                  SliverPadding(
+                    padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+                    sliver: SliverList.separated(
+                      itemCount: items.length,
+                      separatorBuilder: (_, _) => const SizedBox(height: 8),
+                      itemBuilder: (context, index) {
+                        final item = items[index];
+                        return Dismissible(
+                          key: ValueKey(item.id),
+                          direction: DismissDirection.endToStart,
+                          background: Container(
+                            alignment: Alignment.centerRight,
+                            padding: const EdgeInsets.only(right: 20),
+                            decoration: BoxDecoration(
+                              color: scheme.errorContainer,
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: Icon(
+                              Icons.delete_outline,
+                              color: scheme.onErrorContainer,
+                            ),
                           ),
-                        )
-                      else
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
-                          sliver: SliverList.separated(
-                            itemCount: items.length,
-                            separatorBuilder:
-                                (_, _) => const SizedBox(height: 8),
-                            itemBuilder: (context, index) {
-                              final item = items[index];
-                              return Dismissible(
-                                key: ValueKey(item.id),
-                                direction: DismissDirection.endToStart,
-                                background: Container(
-                                  alignment: Alignment.centerRight,
-                                  padding: const EdgeInsets.only(right: 20),
-                                  decoration: BoxDecoration(
-                                    color: scheme.errorContainer,
-                                    borderRadius: BorderRadius.circular(12),
-                                  ),
-                                  child: Icon(
-                                    Icons.delete_outline,
-                                    color: scheme.onErrorContainer,
-                                  ),
-                                ),
-                                onDismissed: (_) => _remove(item),
-                                child: StashRow(
-                                  item: item,
-                                  onOpen: () => _openItem(item),
-                                  onDelete: () => _remove(item),
-                                ),
-                              );
-                            },
+                          onDismissed: (_) => _remove(item),
+                          child: StashRow(
+                            item: item,
+                            onOpen: () => _openItem(item),
+                            onDelete: () => _remove(item),
                           ),
-                        ),
-                    ],
-                  );
-                },
-              ),
-            ),
-        );
+                        );
+                      },
+                    ),
+                  ),
+              ],
+            );
+          },
+        ),
+      ),
+    );
   }
 
-  /// The "Saved N · On this device" row above the library list.
-  ///
-  /// It lives in a sliver so the whole body scrolls as one: at a large
-  /// text scale nothing fixed can be pushed past the viewport.
-  // One flex distributor (the Expanded) keeps the trailing
-  // cluster glued to the right edge: its content is end-aligned,
-  // so on a phone this renders exactly like a Spacer would.
-  // The inner Flexible only binds on genuine overflow — widget
-  // tests use the wide Ahem font, where the text can exceed
-  // the row while fitting on a real phone.
   Widget _savedHeader(int count) {
     final scheme = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
@@ -175,9 +163,7 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(width: 8),
           Text(
             '$count',
-            style: text.bodyMedium?.copyWith(
-              color: scheme.onSurfaceVariant,
-            ),
+            style: text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
           ),
 
           Expanded(
