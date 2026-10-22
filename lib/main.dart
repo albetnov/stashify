@@ -32,7 +32,7 @@ class _StashifyAppState extends State<StashifyApp> {
       title: 'Stashify',
       theme: lightTheme,
       darkTheme: darkTheme,
-      home: QueryScope(client: QueryClient(), child: const HomeScreen()),
+      home: QueryScope(client: getIt<QueryClient>(), child: const HomeScreen()),
     );
   }
 }

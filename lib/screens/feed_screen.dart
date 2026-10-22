@@ -9,6 +9,7 @@ import 'package:stashify/services/stash_service.dart';
 import 'package:stashify/utils/browser.dart';
 import 'package:stashify/utils/link_utils.dart';
 import 'package:stashify/widgets/empty_state.dart';
+import 'package:stashify/widgets/feed_entry_download_row.dart';
 import 'package:stashify/widgets/feed_entry_row.dart';
 import 'package:stashify/widgets/stash_sheets.dart';
 
@@ -61,9 +62,6 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
-  /// The entries with a download in flight.
-  final Set<StashEntry> _downloading = {};
-
   StashItem _current(List<StashItem> items) {
     for (final item in items) {
       if (item.id == widget.feed.id) return item;
@@ -73,7 +71,6 @@ class _FeedScreenState extends State<FeedScreen> {
 
   EntryReadState _stateOf(StashEntry entry) {
     if (entry.article != null) return EntryReadState.downloaded;
-    if (_downloading.contains(entry)) return EntryReadState.downloading;
     final link = entry.link?.trim() ?? '';
     final uri = Uri.tryParse(link);
     final openable =
@@ -109,19 +106,8 @@ class _FeedScreenState extends State<FeedScreen> {
       case EntryReadState.unsupported:
         showEntrySheet(context, entry);
       case EntryReadState.downloadable:
-        setState(() => _downloading.add(entry));
-        try {
-          final article = await widget.service.fetchEntryArticle(feed, entry);
-          if (!mounted) return;
-          _openArticle(feed, entry, article);
-        } on StashException catch (error) {
-          if (!mounted) return;
-          ScaffoldMessenger.of(context)
-            ..clearSnackBars()
-            ..showSnackBar(SnackBar(content: Text(error.message)));
-        } finally {
-          if (mounted) setState(() => _downloading.remove(entry));
-        }
+        // Runs inside a FeedEntryDownloadRow, which owns the fetch.
+        break;
     }
   }
 
@@ -210,6 +196,15 @@ class _FeedScreenState extends State<FeedScreen> {
                 ),
                 itemBuilder: (context, index) {
                   final entry = entries[index];
+                  if (_stateOf(entry) == EntryReadState.downloadable) {
+                    return FeedEntryDownloadRow(
+                      key: ValueKey('download:${entry.link}'),
+                      feed: feed,
+                      entry: entry,
+                      service: widget.service,
+                      onOpen: _openArticle,
+                    );
+                  }
                   return FeedEntryRow(
                     entry: entry,
                     state: _stateOf(entry),

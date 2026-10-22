@@ -67,6 +67,27 @@ the writer expiry and the reader's `cacheTime` wins. For the loop to
 connect, mutation and query must share the `client` **and** the same
 `cacheKey` mapper.
 
+## In Flutter widgets
+
+`package:fetch_forge/flutter.dart` adds `MutationBuilder<T, V>`: it owns the
+mutation, hands its builder a `MutationView<T, V>` (the signals plus
+`mutate`, `mutateAsync`, `reset`, `invalidateCache`) and disposes
+everything on unmount. A `trigger` signal starts the write declaratively,
+with the current `variables`. The read side is the mirror image:
+`QueryBuilder` hands its builder a `QueryView<T, V>` (the state plus
+`watch`, `refetch`, `setData`, `invalidate`), and `autoFetch: false` turns
+the mount fetch off. See the `fetch-forge-flutter-widgets` skill.
+
+```dart
+MutationBuilder<int, String>(
+  mutator: createUser,
+  builder: (context, mutation) => ElevatedButton(
+    onPressed: () => mutation.mutate('ada').ignore(),
+    child: Text(mutation.isPending.value ? 'Saving...' : 'Save'),
+  ),
+);
+```
+
 ## Caveats
 
 - Writes are never deduplicated: two concurrent `mutate` calls run two
