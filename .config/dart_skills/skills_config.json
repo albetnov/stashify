@@ -293,6 +293,72 @@
             "path": "skills/get-it-expert"
           }
         ]
+      },
+      "package:sqlite3_driver_forge": {
+        "skills": [
+          {
+            "name": "sqlite3-driver-forge-driver",
+            "installedAt": "2026-10-22T08:18:09.303389Z",
+            "contentHash": "cbhNiXskbwAY8KXFbSakCA==",
+            "path": "skills/sqlite3-driver-forge-driver"
+          },
+          {
+            "name": "sqlite3-driver-forge-cipher",
+            "installedAt": "2026-10-22T08:18:09.303690Z",
+            "contentHash": "XeWPtqxRKkvVDp7Izbo7Qw==",
+            "path": "skills/sqlite3-driver-forge-cipher"
+          }
+        ]
+      },
+      "package:sqlite_query_forge": {
+        "skills": [
+          {
+            "name": "sqlite-query-forge-writes",
+            "installedAt": "2026-10-22T08:18:09.303960Z",
+            "contentHash": "a42JsaDIbzi9cYG/imyWiw==",
+            "path": "skills/sqlite-query-forge-writes"
+          },
+          {
+            "name": "sqlite-query-forge-select",
+            "installedAt": "2026-10-22T08:18:09.304319Z",
+            "contentHash": "iJUR9XVElxzopFdBGvgmVg==",
+            "path": "skills/sqlite-query-forge-select"
+          },
+          {
+            "name": "sqlite-query-forge-schema-bridge",
+            "installedAt": "2026-10-22T08:18:09.304680Z",
+            "contentHash": "av0FOGLPaG+HXDTzZInYdw==",
+            "path": "skills/sqlite-query-forge-schema-bridge"
+          },
+          {
+            "name": "sqlite-query-forge-forge",
+            "installedAt": "2026-10-22T08:18:09.305021Z",
+            "contentHash": "CPkH0QxEFL4sshC74IMusg==",
+            "path": "skills/sqlite-query-forge-forge"
+          },
+          {
+            "name": "sqlite-query-forge-expressions",
+            "installedAt": "2026-10-22T08:18:09.305379Z",
+            "contentHash": "UuVqzrmmy0jzcPdIbKVIdQ==",
+            "path": "skills/sqlite-query-forge-expressions"
+          }
+        ]
+      },
+      "package:sqlite_schema_forge": {
+        "skills": [
+          {
+            "name": "sqlite-schema-forge-schema",
+            "installedAt": "2026-10-22T08:18:09.305746Z",
+            "contentHash": "9gxD34XWUAiEVFOEcTvilw==",
+            "path": "skills/sqlite-schema-forge-schema"
+          },
+          {
+            "name": "sqlite-schema-forge-migration",
+            "installedAt": "2026-10-22T08:18:09.306114Z",
+            "contentHash": "w+vYlS/sY3LTEvLtJ/eKpg==",
+            "path": "skills/sqlite-schema-forge-migration"
+          }
+        ]
       }
     }
   },

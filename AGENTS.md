@@ -45,6 +45,19 @@ asking for it explicitly.
   `flutter test` (it runs every test file in one go — do not loop over
   `flutter test test/<file>.dart`).
 - `flutter analyze` must be clean too.
+- **Integration tests only.** Cover behavior through widget tests that boot
+  the real app (`tester.pumpWidget(const StashifyApp())`). Do not add plain
+  unit tests for logic already reachable through a widget test; plain
+  `test()`s are only for pure logic with no widget path (codecs, mappers).
+- **No throwaway probe tests.** Never create temporary diagnostic tests to
+  chase a failure: they are slow, and under `testWidgets` the FakeAsync
+  zone makes them lie (timers and timeouts only fire on pump). Reproduce
+  via the real suite and read the full `flutter test` log instead.
+- **Real async needs `runAsync`.** `SqliteDriver.connect()` (worker-isolate
+  handshake) never resolves under `testWidgets`' FakeAsync. Widget tests
+  that boot the app pre-warm with
+  `await tester.runAsync(() => setupServicesAsync())` before `pumpWidget`;
+  driver behaviour itself is covered by plain `test()`s.
 
 Verify a screen in `test/` instead:
 

@@ -7,9 +7,11 @@ import 'package:stashify/services/service_locator.dart';
 import 'package:stashify/services/stash_service.dart';
 
 import 'fixtures/feed_fixture.dart';
+import 'test_helper.dart';
 
 void main() {
   setUp(() async {
+    mockPathProvider();
     await getIt.reset();
     getIt.registerFactory<StashService>(
       () => serviceServing(feedXml, delay: const Duration(milliseconds: 50)),
@@ -27,6 +29,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(textScaler: TextScaler.linear(1.3)),
@@ -55,6 +58,7 @@ void main() {
     addTearDown(tester.view.resetPhysicalSize);
     addTearDown(tester.view.resetDevicePixelRatio);
 
+    await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(
       const MediaQuery(
         data: MediaQueryData(textScaler: TextScaler.linear(2.0)),

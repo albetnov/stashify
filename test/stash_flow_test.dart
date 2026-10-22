@@ -8,9 +8,11 @@ import 'package:stashify/services/service_locator.dart';
 import 'package:stashify/services/stash_service.dart';
 
 import 'fixtures/feed_fixture.dart';
+import 'test_helper.dart';
 
 void main() {
   setUp(() async {
+    mockPathProvider();
     await getIt.reset();
     getIt.registerFactory<StashService>(
       () => serviceServing(feedXml, delay: const Duration(milliseconds: 50)),
@@ -23,6 +25,7 @@ void main() {
 
   testWidgets('Feed URL activates chip and stashes with progress',
       (WidgetTester tester) async {
+    await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(const StashifyApp());
     await tester.pumpAndSettle();
 
@@ -46,6 +49,7 @@ void main() {
 
   testWidgets('Tapping a stashed feed opens its entries',
       (WidgetTester tester) async {
+    await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(const StashifyApp());
     await tester.pumpAndSettle();
 
@@ -67,6 +71,7 @@ void main() {
   });
 
   testWidgets('Invalid URL shows an inline error', (WidgetTester tester) async {
+    await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(const StashifyApp());
     await tester.pumpAndSettle();
 
