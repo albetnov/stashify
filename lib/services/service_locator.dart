@@ -23,7 +23,10 @@ final getIt = GetIt.instance;
 /// never touches SQLite directly.
 Future<SqliteDriver> openAppDatabase({Directory? directory}) async {
   final dir = directory ?? await _appDbDir();
-  final driver = SqliteDriver.file(p.join(dir.path, 'stashify.db'));
+  final driver = SqliteDriver.file(
+    p.join(dir.path, 'stashify.db'),
+    onTrace: const ConsoleSqlTrace().call,
+  );
   await driver.connect();
   return driver;
 }

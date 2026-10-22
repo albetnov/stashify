@@ -135,7 +135,7 @@ class StashService {
 
     final entries = feed.entries
         .map(
-          (candidate) => identical(candidate, entry)
+          (candidate) => candidate.link == entry.link
               ? StashEntry(
                   title: candidate.title,
                   link: candidate.link,

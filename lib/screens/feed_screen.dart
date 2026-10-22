@@ -76,8 +76,7 @@ class _FeedScreenState extends State<FeedScreen> {
 
   EntryReadState _stateOf(StashEntry entry) {
     // A cached body never turns an unsupported host into a readable article.
-    if (entry.article != null &&
-        isSupportedArticleHost(entry.link ?? '')) {
+    if (entry.article != null && isSupportedArticleHost(entry.link ?? '')) {
       return EntryReadState.downloaded;
     }
     final link = entry.link?.trim() ?? '';

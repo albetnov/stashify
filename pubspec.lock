@@ -593,18 +593,18 @@ packages:
     dependency: "direct main"
     description:
       name: sqlite3_driver_forge
-      sha256: "6257285e666ac9beaef5da24ff21d099da7f1c0b4601ff5b6eaf3bf7e93e9b39"
+      sha256: c1be111409534851a3ab7d0fb86ba6e3a30a9a4442d0552c8c99e6c7fa6e51d8
       url: "https://pub.dev"
     source: hosted
-    version: "0.1.3"
+    version: "0.2.0"
   sqlite_query_forge:
     dependency: "direct main"
     description:
       name: sqlite_query_forge
-      sha256: d440e7c80b75b65c6608c59cccd8770817baad4d1723fe349ab385765e4437d9
+      sha256: "49a7d2784a774a8c3b5b60fbbc2cf0cf2172602ae37c8bcdf4d1016f38c5c89e"
       url: "https://pub.dev"
     source: hosted
-    version: "0.4.0"
+    version: "0.4.1"
   sqlite_schema_forge:
     dependency: "direct main"
     description:
