@@ -12,6 +12,7 @@ import 'package:sqlite_query_forge/sqlite_query_forge.dart';
 import 'package:sqlite_schema_forge/sqlite_schema_forge.dart';
 
 import 'package:stashify/data/stash_schema.dart';
+import 'package:stashify/data/stash_store.dart';
 import 'package:stashify/services/stash_service.dart';
 
 final getIt = GetIt.instance;
@@ -75,10 +76,29 @@ void setupServices() {
     );
   }
 
+  if (!getIt.isRegistered<Forge>()) {
+    getIt.registerSingletonAsync<Forge>(
+      () async => Forge(await getIt.getAsync<SqliteDriver>()),
+      dependsOn: [SqliteDriver],
+    );
+  }
+
+  if (!getIt.isRegistered<StashStore>()) {
+    getIt.registerSingletonAsync<StashStore>(
+      () async => StashStore(await getIt.getAsync<Forge>()),
+      dependsOn: [Forge],
+    );
+  }
+
   if (getIt.isRegistered<StashService>()) return;
 
   getIt.registerFactory<StashService>(
-    () => StashService(client: getIt<http.Client>()),
+    () => StashService(
+      client: getIt<http.Client>(),
+      store: getIt.isRegistered<StashStore>() && getIt.isReadySync<StashStore>()
+          ? getIt<StashStore>()
+          : null,
+    ),
   );
 }
 
@@ -103,6 +123,8 @@ Future<void> setupServicesAsync({bool offline = false}) async {
       targetSchema: stashSchema(),
       allowDestructive: false,
     );
+    await getIt.getAsync<Forge>();
+    await getIt.getAsync<StashStore>();
     // Preload lands here with the store.
   }
   // Yield so the splash paints at least one frame before home.

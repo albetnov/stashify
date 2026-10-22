@@ -20,10 +20,11 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   late final StashService _service = getIt<StashService>();
 
-  void _remove(StashItem item) {
+  Future<void> _remove(StashItem item) async {
     final index = _service.items.value.indexWhere((e) => e.id == item.id);
     if (index == -1) return;
-    _service.remove(item);
+    await _service.remove(item);
+    if (!mounted) return;
     ScaffoldMessenger.of(context).clearSnackBars();
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(

@@ -4,6 +4,8 @@ import 'package:http/http.dart' as http;
 import 'package:rss_dart/dart_rss.dart';
 import 'package:signals/signals.dart';
 
+import 'package:stashify/data/stash_schema.dart';
+import 'package:stashify/data/stash_store.dart';
 import 'package:stashify/models/article.dart';
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/services/albetnv_adapter.dart';
@@ -11,12 +13,16 @@ import 'package:stashify/services/article_adapter.dart';
 import 'package:stashify/utils/link_utils.dart';
 
 class StashService {
-  StashService({http.Client? client, List<ArticleAdapter>? adapters})
-    : _client = client ?? http.Client(),
-      _adapters = adapters ?? const [AlbetnvAdapter()];
+  StashService({
+    http.Client? client,
+    List<ArticleAdapter>? adapters,
+    this._store,
+  }) : _client = client ?? http.Client(),
+       _adapters = adapters ?? const [AlbetnvAdapter()];
 
   final http.Client _client;
   final List<ArticleAdapter> _adapters;
+  final StashStore? _store;
   final Signal<List<StashItem>> _items = signal([]);
 
   static const _timeout = Duration(seconds: 15);
@@ -68,6 +74,7 @@ class StashService {
       article: article,
     );
 
+    await _persist(item);
     _items.value = [item, ..._items.peek()];
     return item;
   }
@@ -133,6 +140,9 @@ class StashService {
       isFeed: true,
       entries: entries,
     );
+    if (_store != null) {
+      await _store.saveEntryArticle(feed.id, entry.link, article);
+    }
     _items.value = [
       for (final item in _items.peek())
         if (item.id == feed.id) updated else item,
@@ -152,6 +162,7 @@ class StashService {
     }
 
     final title = feed.title?.trim();
+    final entries = feed.items.map(_entryOf).toList();
     final item = StashItem(
       id: 's${DateTime.now().microsecondsSinceEpoch}',
       url: raw,
@@ -159,9 +170,10 @@ class StashService {
       domain: domainOf(raw),
       savedAt: DateTime.now(),
       isFeed: true,
-      entries: feed.items.map(_entryOf).toList(),
+      entries: entries,
     );
 
+    await _persist(item);
     _items.value = [item, ..._items.peek()];
     return item;
   }
@@ -187,17 +199,54 @@ class StashService {
   }
 
   /// Takes [item] out of the stash.
-  void remove(StashItem item) {
+  Future<void> remove(StashItem item) async {
+    if (_store != null) await _store.removeItem(item.id);
     final items = [..._items.peek()]..removeWhere((e) => e.id == item.id);
     _items.value = items;
   }
 
   /// Puts [item] back into the stash at [index].
-  void restore(StashItem item, int index) {
+  Future<void> restore(StashItem item, int index) async {
+    if (_store != null) await _persist(item);
     final items = [..._items.peek()];
     final at = index < 0 ? 0 : (index > items.length ? items.length : index);
     items.insert(at, item);
     _items.value = items;
+  }
+
+  Future<void> _persist(StashItem item) async {
+    if (_store == null) return;
+    final row = StashItemRow(
+      id: item.id,
+      url: item.url,
+      title: item.title,
+      domain: item.domain,
+      savedAt: item.savedAt,
+      isFeed: item.isFeed,
+      readMinutes: item.readMinutes,
+      position: 0,
+      article: item.article,
+    );
+    final entryRows = item.entries
+        .asMap()
+        .entries
+        .map(
+          (e) => EntryRow(
+            feedId: item.id,
+            title: e.value.title,
+            link: e.value.link,
+            summary: e.value.summary,
+            publishedAt: e.value.publishedAt,
+            position: e.key,
+            article: e.value.article,
+          ),
+        )
+        .toList();
+    try {
+      await _store.saveItem(row, entryRows);
+    } catch (_) {
+      throw const StashException('Could not save that link.');
+    }
   }
 
   StashEntry _entryOf(RssItem entry) {
