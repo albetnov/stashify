@@ -2,6 +2,9 @@ import 'dart:convert';
 
 import 'package:http/http.dart' as http;
 import 'package:rss_dart/dart_rss.dart';
+
+
+import 'package:fetch_forge/fetch_forge.dart';
 import 'package:signals/signals.dart';
 
 import 'package:stashify/data/stash_schema.dart';
@@ -12,24 +15,40 @@ import 'package:stashify/services/albetnv_adapter.dart';
 import 'package:stashify/services/article_adapter.dart';
 import 'package:stashify/utils/link_utils.dart';
 
+/// Shared cache key for the persisted library list.
+const String stashLibraryKey = 'stash:library';
+
 class StashService {
   StashService({
     http.Client? client,
     List<ArticleAdapter>? adapters,
     this._store,
+    this._queryClient,
   }) : _client = client ?? http.Client(),
        _adapters = adapters ?? const [AlbetnvAdapter()];
 
   final http.Client _client;
   final List<ArticleAdapter> _adapters;
   final StashStore? _store;
+  final QueryClient? _queryClient;
+  final List<StashItem> _memoryItems = [];
   final Signal<List<StashItem>> _items = signal([]);
 
   static const _timeout = Duration(seconds: 15);
   static const _userAgent = 'Stashify/0.1';
 
   /// The stashed items, newest first.
+  /// The stashed items as a signal, for screens that need synchronous reads.
   ReadonlySignal<List<StashItem>> get items => _items;
+
+  Future<List<StashItem>> loadLibrary([int page = 0]) async {
+    if (_store != null) return _store.loadLibrary();
+    return List<StashItem>.unmodifiable(_memoryItems);
+  }
+
+  void _invalidateLibrary() {
+    _queryClient?.invalidate(stashLibraryKey);
+  }
 
   /// Stashes [raw] and returns the stashed item.
   ///
@@ -75,7 +94,9 @@ class StashService {
     );
 
     await _persist(item);
-    _items.value = [item, ..._items.peek()];
+    if (_store == null) _memoryItems.insert(0, item);
+    _invalidateLibrary();
+    _items.value = await loadLibrary();
     return item;
   }
 
@@ -142,11 +163,12 @@ class StashService {
     );
     if (_store != null) {
       await _store.saveEntryArticle(feed.id, entry.link, article);
+    } else {
+      final idx = _memoryItems.indexWhere((i) => i.id == feed.id);
+      if (idx != -1) _memoryItems[idx] = updated;
     }
-    _items.value = [
-      for (final item in _items.peek())
-        if (item.id == feed.id) updated else item,
-    ];
+    _invalidateLibrary();
+    _items.value = await loadLibrary();
     return article;
   }
 
@@ -174,7 +196,9 @@ class StashService {
     );
 
     await _persist(item);
-    _items.value = [item, ..._items.peek()];
+    if (_store == null) _memoryItems.insert(0, item);
+    _invalidateLibrary();
+    _items.value = await loadLibrary();
     return item;
   }
 
@@ -201,17 +225,22 @@ class StashService {
   /// Takes [item] out of the stash.
   Future<void> remove(StashItem item) async {
     if (_store != null) await _store.removeItem(item.id);
-    final items = [..._items.peek()]..removeWhere((e) => e.id == item.id);
-    _items.value = items;
+    _memoryItems.removeWhere((e) => e.id == item.id);
+    _invalidateLibrary();
+    _items.value = await loadLibrary();
   }
 
   /// Puts [item] back into the stash at [index].
   Future<void> restore(StashItem item, int index) async {
     if (_store != null) await _persist(item);
-    final items = [..._items.peek()];
-    final at = index < 0 ? 0 : (index > items.length ? items.length : index);
-    items.insert(at, item);
-    _items.value = items;
+    if (_store == null) {
+      final at = index < 0
+          ? 0
+          : (index > _memoryItems.length ? _memoryItems.length : index);
+      _memoryItems.insert(at, item);
+    }
+    _invalidateLibrary();
+    _items.value = await loadLibrary();
   }
 
   Future<void> _persist(StashItem item) async {

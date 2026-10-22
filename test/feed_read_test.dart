@@ -57,9 +57,9 @@ Widget _screen(
   ),
 );
 
-StashItem _seed(StashService service, List<StashEntry> entries) {
+Future<StashItem> _seed(StashService service, List<StashEntry> entries) async {
   final feed = _feed(entries: entries);
-  service.restore(feed, 0);
+  await service.restore(feed, 0);
   return feed;
 }
 
@@ -71,7 +71,7 @@ void main() {
       _pageHtml,
       delay: const Duration(milliseconds: 50),
     );
-    final feed = _seed(service, [
+    final feed = await _seed(service, [
       StashEntry(
         title: 'Fast validators',
         link: 'https://albetnv.dev/blog/fast',
@@ -84,6 +84,7 @@ void main() {
     expect(find.widgetWithText(TextButton, 'Read'), findsOneWidget);
 
     await tester.tap(find.widgetWithText(TextButton, 'Read'));
+    await tester.pump();
     await tester.pump();
     expect(find.text('Downloading…'), findsOneWidget);
     await tester.pumpAndSettle();
@@ -103,7 +104,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final service = _serviceServing('nope', status: 500);
-    final feed = _seed(service, [
+    final feed = await _seed(service, [
       const StashEntry(
         title: 'Cached entry',
         link: 'https://albetnv.dev/blog/cached',
@@ -130,7 +131,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final service = _serviceServing('nope', status: 404);
-    final feed = _seed(service, [
+    final feed = await _seed(service, [
       StashEntry(
         title: 'Fast validators',
         link: 'https://albetnv.dev/blog/fast',
@@ -154,7 +155,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final service = _serviceServing(_pageHtml);
-    final feed = _seed(service, [
+    final feed = await _seed(service, [
       StashEntry(
         title: 'Elsewhere',
         link: 'https://example.com/elsewhere',
@@ -184,7 +185,7 @@ void main() {
     WidgetTester tester,
   ) async {
     final service = _serviceServing(_pageHtml);
-    final feed = _seed(service, [
+    final feed = await _seed(service, [
       StashEntry(
         title: 'Elsewhere',
         link: 'https://example.com/elsewhere',

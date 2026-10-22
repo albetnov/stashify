@@ -2,6 +2,7 @@
 import 'package:http/http.dart' as http;
 import 'package:http/testing.dart';
 
+import 'package:fetch_forge/fetch_forge.dart';
 import 'package:stashify/services/stash_service.dart';
 
 const feedXml = '''
@@ -35,6 +36,7 @@ StashService serviceServing(
   String body, {
   int status = 200,
   Duration delay = Duration.zero,
+  QueryClient? queryClient,
 }) {
   return StashService(
     client: MockClient((request) async {
@@ -45,5 +47,6 @@ StashService serviceServing(
         headers: {'content-type': 'application/rss+xml; charset=utf-8'},
       );
     }),
+    queryClient: queryClient,
   );
 }

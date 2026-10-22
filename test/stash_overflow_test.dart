@@ -2,6 +2,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 
+import 'package:fetch_forge/fetch_forge.dart';
 import 'package:stashify/main.dart';
 import 'package:stashify/services/service_locator.dart';
 import 'package:stashify/services/stash_service.dart';
@@ -14,7 +15,11 @@ void main() {
     mockPathProvider();
     await getIt.reset();
     getIt.registerFactory<StashService>(
-      () => serviceServing(feedXml, delay: const Duration(milliseconds: 50)),
+      () => serviceServing(
+        feedXml,
+        delay: const Duration(milliseconds: 50),
+        queryClient: getIt<QueryClient>(),
+      ),
     );
   });
 

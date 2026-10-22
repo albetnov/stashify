@@ -98,6 +98,9 @@ void setupServices() {
       store: getIt.isRegistered<StashStore>() && getIt.isReadySync<StashStore>()
           ? getIt<StashStore>()
           : null,
+      queryClient: getIt.isRegistered<QueryClient>()
+          ? getIt<QueryClient>()
+          : null,
     ),
   );
 }

@@ -27,8 +27,8 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Stash'));
     await tester.pumpAndSettle();
 
-    expect(service.items.value, hasLength(1));
-    expect(service.items.value.single.title, 'Stashify Weekly');
+    expect(await service.loadLibrary(), hasLength(1));
+    expect((await service.loadLibrary()).single.title, 'Stashify Weekly');
     expect(find.text('Saved for offline reading.'), findsOneWidget);
   });
 
@@ -45,7 +45,7 @@ void main() {
     await tester.tap(find.widgetWithText(FilledButton, 'Stash'));
     await tester.pumpAndSettle();
 
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
     expect(find.textContaining('404'), findsOneWidget);
     expect(find.text('Saved for offline reading.'), findsNothing);
   });

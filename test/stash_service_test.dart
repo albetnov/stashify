@@ -37,11 +37,11 @@ void main() {
   test('the stashed feed lands in the items signal', () async {
     final service = serviceServing(feedXml);
 
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
 
     final item = await service.stash('https://example.com/feed.xml');
 
-    expect(service.items.value, [item]);
+    expect(await service.loadLibrary(), [item]);
   });
 
   test('a second feed lands on top of the first', () async {
@@ -50,7 +50,7 @@ void main() {
     final first = await service.stash('https://example.com/feed.xml');
     final second = await service.stash('https://example.com/other.xml');
 
-    expect(service.items.value, [second, first]);
+    expect(await service.loadLibrary(), [second, first]);
   });
 
   test('a link that is not a link is refused', () async {
@@ -60,7 +60,7 @@ void main() {
       service.stash('not a url'),
       throwsA(isA<StashException>()),
     );
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
   });
 
   test('a host that answers with an error fails the stash', () async {
@@ -76,7 +76,7 @@ void main() {
         ),
       ),
     );
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
   });
 
   test('a host that cannot be reached fails the stash', () async {
@@ -88,7 +88,7 @@ void main() {
       service.stash('https://example.com/feed.xml'),
       throwsA(isA<StashException>()),
     );
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
   });
 
   test('a page that is not a feed is not stashed', () async {
@@ -104,7 +104,7 @@ void main() {
         ),
       ),
     );
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
   });
 
   test('an article on an unsupported site is refused', () async {
@@ -120,7 +120,7 @@ void main() {
         ),
       ),
     );
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
   });
 
   test('an article on a supported site is stashed with its body', () async {
@@ -145,7 +145,7 @@ void main() {
     expect(item.article, isNotNull);
     expect(item.article!.coverImageUrl, 'https://example.com/cover.jpg');
     expect(item.article!.blocks.single, isA<ArticleParagraph>());
-    expect(service.items.value, [item]);
+    expect(await service.loadLibrary(), [item]);
   });
 
   test('the saved albetnv.dev page is stashed as an article', () async {
@@ -176,7 +176,7 @@ void main() {
         ),
       ),
     );
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
   });
 
   test('remove takes the item out and restore puts it back', () async {
@@ -184,9 +184,9 @@ void main() {
     final item = await service.stash('https://example.com/feed.xml');
 
     service.remove(item);
-    expect(service.items.value, isEmpty);
+    expect(await service.loadLibrary(), isEmpty);
 
     service.restore(item, 0);
-    expect(service.items.value, [item]);
+    expect(await service.loadLibrary(), [item]);
   });
 }

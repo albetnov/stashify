@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fetch_forge/flutter.dart';
 import 'package:signals/signals_flutter.dart';
 
 import 'package:stashify/models/stash_item.dart';
@@ -19,9 +20,11 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   late final StashService _service = getIt<StashService>();
+  final Signal<int> _vars = signal(0);
 
   Future<void> _remove(StashItem item) async {
-    final index = _service.items.value.indexWhere((e) => e.id == item.id);
+    final loaded = await _service.loadLibrary();
+    final index = loaded.indexWhere((e) => e.id == item.id);
     if (index == -1) return;
     await _service.remove(item);
     if (!mounted) return;
@@ -70,9 +73,12 @@ class _HomeScreenState extends State<HomeScreen> {
         // The whole body scrolls as one: at a large text scale the intro
         // copy and the card grow together instead of pushing a fixed
         // header past the viewport.
-        child: SignalBuilder(
-          builder: (context) {
-            final items = _service.items.value;
+        child: QueryBuilder<List<StashItem>, int>(
+          fetcher: _service.loadLibrary,
+          variables: _vars,
+          cacheKey: (_) => stashLibraryKey,
+          builder: (context, query) {
+            final items = query.data.value ?? const <StashItem>[];
             return CustomScrollView(
               slivers: [
                 SliverToBoxAdapter(
