@@ -14,8 +14,9 @@ Widget _host(StashService service) {
 }
 
 void main() {
-  testWidgets('A stashed feed is saved and the user is told',
-      (WidgetTester tester) async {
+  testWidgets('A stashed feed is saved and the user is told', (
+    WidgetTester tester,
+  ) async {
     final service = serviceServing(feedXml);
     await tester.pumpWidget(_host(service));
 
@@ -32,8 +33,9 @@ void main() {
     expect(find.text('Saved for offline reading.'), findsOneWidget);
   });
 
-  testWidgets('A failed link is reported and nothing is stashed',
-      (WidgetTester tester) async {
+  testWidgets('A failed link is reported and nothing is stashed', (
+    WidgetTester tester,
+  ) async {
     final service = serviceServing('Not found', status: 404);
     await tester.pumpWidget(_host(service));
 
@@ -50,8 +52,9 @@ void main() {
     expect(find.text('Saved for offline reading.'), findsNothing);
   });
 
-  testWidgets('A failed link stays in the field, ready to be fixed',
-      (WidgetTester tester) async {
+  testWidgets('A failed link stays in the field, ready to be fixed', (
+    WidgetTester tester,
+  ) async {
     final service = serviceServing(pageHtml);
     await tester.pumpWidget(_host(service));
 

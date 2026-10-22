@@ -29,8 +29,7 @@ const _fontDirs = [
 /// type instead of the test font's boxes.
 Future<void> _loadFont(String family) async {
   final home = Platform.environment['HOME'] ?? '';
-  final flutterRoot =
-      Platform.environment['FLUTTER_ROOT'] ?? '$home/flutter';
+  final flutterRoot = Platform.environment['FLUTTER_ROOT'] ?? '$home/flutter';
 
   final candidates = [
     for (final dir in _fontDirs) '$dir/$family-Regular.ttf',
@@ -60,35 +59,36 @@ Future<void> _loadFonts() async {
 }
 
 StashItem _feed() => StashItem(
-      id: 's1',
-      url: 'https://example.com/feed.xml',
-      title: 'Stashify Weekly',
-      domain: 'example.com',
-      savedAt: DateTime.now(),
-      isFeed: true,
-      entries: [
-        StashEntry(
-          title: 'Reading on the train',
-          link: 'https://example.com/one',
-          summary:
-              'Why offline still wins when the connection does not, and what '
-              'that means for the way we save things.',
-          publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
-        ),
-        StashEntry(
-          title: 'The second entry, with a much longer headline that has to '
-              'wrap and then some',
-          link: 'https://example.com/two',
-          summary: 'A shorter summary.',
-          publishedAt: DateTime.now().subtract(const Duration(days: 3)),
-        ),
-        StashEntry(
-          title: 'Third entry',
-          link: 'https://example.com/three',
-          publishedAt: DateTime.now().subtract(const Duration(days: 12)),
-        ),
-      ],
-    );
+  id: 's1',
+  url: 'https://example.com/feed.xml',
+  title: 'Stashify Weekly',
+  domain: 'example.com',
+  savedAt: DateTime.now(),
+  isFeed: true,
+  entries: [
+    StashEntry(
+      title: 'Reading on the train',
+      link: 'https://example.com/one',
+      summary:
+          'Why offline still wins when the connection does not, and what '
+          'that means for the way we save things.',
+      publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
+    ),
+    StashEntry(
+      title:
+          'The second entry, with a much longer headline that has to '
+          'wrap and then some',
+      link: 'https://example.com/two',
+      summary: 'A shorter summary.',
+      publishedAt: DateTime.now().subtract(const Duration(days: 3)),
+    ),
+    StashEntry(
+      title: 'Third entry',
+      link: 'https://example.com/three',
+      publishedAt: DateTime.now().subtract(const Duration(days: 12)),
+    ),
+  ],
+);
 
 /// A feed screen backed by a seeded service, so the rows can read states.
 FeedScreen _feedScreen() {
@@ -135,10 +135,7 @@ void main() {
 
     await tester.pumpWidget(
       _app(
-        RepaintBoundary(
-          key: const ValueKey('capture'),
-          child: _feedScreen(),
-        ),
+        RepaintBoundary(key: const ValueKey('capture'), child: _feedScreen()),
       ),
     );
     await tester.pumpAndSettle();
@@ -157,10 +154,7 @@ void main() {
 
     await tester.pumpWidget(
       _app(
-        RepaintBoundary(
-          key: const ValueKey('capture'),
-          child: _feedScreen(),
-        ),
+        RepaintBoundary(key: const ValueKey('capture'), child: _feedScreen()),
         brightness: Brightness.dark,
       ),
     );
@@ -183,11 +177,7 @@ void main() {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                StashRow(
-                  item: _feed(),
-                  onOpen: () {},
-                  onDelete: () {},
-                ),
+                StashRow(item: _feed(), onOpen: () {}, onDelete: () {}),
               ],
             ),
           ),

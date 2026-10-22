@@ -84,11 +84,10 @@ void main() {
 
       await forge.insertInto(items).values(_item().toMap()).execute();
 
-      final row =
-          await forge
-              .selectFrom(items)
-              .where(items.id.eq('s1'))
-              .getSingle();
+      final row = await forge
+          .selectFrom(items)
+          .where(items.id.eq('s1'))
+          .getSingle();
       expect(row.url, 'https://example.com/feed.xml');
       expect(row.title, 'Stashify Weekly');
       expect(row.isFeed, isTrue);
@@ -114,15 +113,13 @@ void main() {
         _entry('https://example.com/a', 0).toMap(),
       ]).execute();
 
-      final rows =
-          await forge
-              .selectFrom(entries)
-              .orderBy([OrderBy(entries.position)])
-              .getMany();
-      expect(
-        rows.map((e) => e.link),
-        ['https://example.com/a', 'https://example.com/b'],
-      );
+      final rows = await forge.selectFrom(entries).orderBy([
+        OrderBy(entries.position),
+      ]).getMany();
+      expect(rows.map((e) => e.link), [
+        'https://example.com/a',
+        'https://example.com/b',
+      ]);
 
       await expectLater(
         forge
@@ -164,8 +161,10 @@ void main() {
           )
           .execute();
 
-      final row =
-          await forge.selectFrom(items).where(items.id.eq('s2')).getSingle();
+      final row = await forge
+          .selectFrom(items)
+          .where(items.id.eq('s2'))
+          .getSingle();
       expect(row.article, isNotNull);
       expect(row.article!.title, 'Fast validators');
       expect(

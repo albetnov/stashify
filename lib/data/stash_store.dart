@@ -16,10 +16,9 @@ class StashStore {
 
   /// Loads the library: items with their entries assembled, newest first.
   Future<List<StashItem>> loadLibrary() async {
-    final rows = await forge
-        .selectFrom(items)
-        .orderBy([OrderBy(items.position)])
-        .getMany();
+    final rows = await forge.selectFrom(items).orderBy([
+      OrderBy(items.position),
+    ]).getMany();
 
     final result = <StashItem>[];
     for (final row in rows) {
@@ -28,7 +27,9 @@ class StashStore {
           .where(entries.feedId.eq(row.id))
           .orderBy([OrderBy(entries.position)])
           .getMany();
-      result.add(row.toItem(entries: entryRows.map((e) => e.toEntry()).toList()));
+      result.add(
+        row.toItem(entries: entryRows.map((e) => e.toEntry()).toList()),
+      );
     }
     return result;
   }
@@ -73,24 +74,24 @@ class StashStore {
           .where(items.url.eq(item.url))
           .getSingle();
 
-      await tx.deleteFrom(entries).where(entries.feedId.eq(persisted.id)).execute();
+      await tx
+          .deleteFrom(entries)
+          .where(entries.feedId.eq(persisted.id))
+          .execute();
 
       if (entryRows.isNotEmpty) {
-        await tx
-            .insertInto(entries)
-            .valuesAll([
-              for (final e in entryRows)
-                EntryRow(
-                  feedId: persisted.id,
-                  title: e.title,
-                  link: e.link,
-                  summary: e.summary,
-                  publishedAt: e.publishedAt,
-                  position: e.position,
-                  article: e.article,
-                ).toMap(),
-            ])
-            .execute();
+        await tx.insertInto(entries).valuesAll([
+          for (final e in entryRows)
+            EntryRow(
+              feedId: persisted.id,
+              title: e.title,
+              link: e.link,
+              summary: e.summary,
+              publishedAt: e.publishedAt,
+              position: e.position,
+              article: e.article,
+            ).toMap(),
+        ]).execute();
       }
     });
   }
@@ -122,9 +123,7 @@ class StashStore {
   ) async {
     await forge
         .update(entries)
-        .where(link == null
-            ? entries.link.isNull
-            : entries.link.eq(link))
+        .where(link == null ? entries.link.isNull : entries.link.eq(link))
         .values({'article_json': ArticleCodec.encodeString(article)})
         .execute();
   }
@@ -133,11 +132,9 @@ class StashStore {
   Future<void> reorder(List<String> itemIds) async {
     await forge.transaction((tx) async {
       for (var i = 0; i < itemIds.length; i++) {
-        await tx
-            .update(items)
-            .where(items.id.eq(itemIds[i]))
-            .values({'position': i})
-            .execute();
+        await tx.update(items).where(items.id.eq(itemIds[i])).values({
+          'position': i,
+        }).execute();
       }
     });
   }

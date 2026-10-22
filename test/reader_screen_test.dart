@@ -196,8 +196,7 @@ void main() {
             ),
           ]),
           ArticleCode(
-            code:
-                'void aVeryLongFunctionNameThatKeepsGoingAndGoingAndGoing() { return; }',
+            code: 'void aVeryLongFunctionNameThatKeepsGoingAndGoingAndGoing() { return; }',
             language: 'dart',
           ),
         ],

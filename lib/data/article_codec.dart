@@ -39,39 +39,40 @@ abstract final class ArticleCodec {
     blocks: _decodeBlocks(json['blocks']),
   );
 
-  static Map<String, Object?> _encodeBlock(ArticleBlock block) => switch (block) {
-    ArticleHeading(:final level, :final text) => {
-      'type': 'heading',
-      'level': level,
-      'text': text,
-    },
-    ArticleParagraph(:final content) => {
-      'type': 'paragraph',
-      'content': [for (final inline in content) _encodeInline(inline)],
-    },
-    ArticleImage(:final url, :final alt) => {
-      'type': 'image',
-      'url': url,
-      'alt': alt,
-    },
-    ArticleCode(:final code, :final language) => {
-      'type': 'code',
-      'code': code,
-      'language': language,
-    },
-    ArticleList(:final ordered, :final items) => {
-      'type': 'list',
-      'ordered': ordered,
-      'items': [
-        for (final item in items)
-          [for (final inline in item.content) _encodeInline(inline)],
-      ],
-    },
-    ArticleQuote(:final blocks) => {
-      'type': 'quote',
-      'blocks': [for (final inner in blocks) _encodeBlock(inner)],
-    },
-  };
+  static Map<String, Object?> _encodeBlock(ArticleBlock block) =>
+      switch (block) {
+        ArticleHeading(:final level, :final text) => {
+          'type': 'heading',
+          'level': level,
+          'text': text,
+        },
+        ArticleParagraph(:final content) => {
+          'type': 'paragraph',
+          'content': [for (final inline in content) _encodeInline(inline)],
+        },
+        ArticleImage(:final url, :final alt) => {
+          'type': 'image',
+          'url': url,
+          'alt': alt,
+        },
+        ArticleCode(:final code, :final language) => {
+          'type': 'code',
+          'code': code,
+          'language': language,
+        },
+        ArticleList(:final ordered, :final items) => {
+          'type': 'list',
+          'ordered': ordered,
+          'items': [
+            for (final item in items)
+              [for (final inline in item.content) _encodeInline(inline)],
+          ],
+        },
+        ArticleQuote(:final blocks) => {
+          'type': 'quote',
+          'blocks': [for (final inner in blocks) _encodeBlock(inner)],
+        },
+      };
 
   static ArticleBlock? _decodeBlock(Map<String, Object?> json) {
     switch (json['type']) {
@@ -174,8 +175,7 @@ abstract final class ArticleCodec {
   static int _int(Map<String, Object?> json, String key, {int fallback = 0}) =>
       json[key] is int ? json[key] as int : fallback;
 
-  static bool _bool(Map<String, Object?> json, String key) =>
-      json[key] == true;
+  static bool _bool(Map<String, Object?> json, String key) => json[key] == true;
 
   static List<Object?> _list(Map<String, Object?> json, String key) =>
       json[key] is List ? (json[key] as List).cast<Object?>() : const [];

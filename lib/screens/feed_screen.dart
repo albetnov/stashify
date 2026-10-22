@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fetch_forge/flutter.dart';
 import 'package:signals/signals_flutter.dart';
 
 import 'package:connectivity_plus/connectivity_plus.dart';
@@ -62,6 +63,8 @@ class FeedScreen extends StatefulWidget {
 }
 
 class _FeedScreenState extends State<FeedScreen> {
+  final Signal<int> _vars = signal(0);
+
   StashItem _current(List<StashItem> items) {
     for (final item in items) {
       if (item.id == widget.feed.id) return item;
@@ -115,18 +118,17 @@ class _FeedScreenState extends State<FeedScreen> {
     final link = entry.link!.trim();
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder:
-            (_) => ReaderScreen(
-              item: StashItem(
-                id: '${feed.id}:${entry.link}',
-                url: link,
-                title: entry.title,
-                domain: domainOf(link),
-                savedAt: feed.savedAt,
-                readMinutes: article.readMinutes,
-                article: article,
-              ),
-            ),
+        builder: (_) => ReaderScreen(
+          item: StashItem(
+            id: '${feed.id}:${entry.link}',
+            url: link,
+            title: entry.title,
+            domain: domainOf(link),
+            savedAt: feed.savedAt,
+            readMinutes: article.readMinutes,
+            article: article,
+          ),
+        ),
       ),
     );
   }
@@ -143,77 +145,80 @@ class _FeedScreenState extends State<FeedScreen> {
         titleStyle.fontSize! * (titleStyle.height ?? 1.33) * scale;
     final metaHeight = metaStyle.fontSize! * (metaStyle.height ?? 1.33) * scale;
 
-    return Scaffold(
-      appBar: AppBar(
-        // The bar grows with the text, so a large font scale does not
-        // overflow it.
-        toolbarHeight: titleHeight + metaHeight + 16,
-        title: Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              widget.feed.title,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            const SizedBox(height: 2),
-            SignalBuilder(
-              builder: (context) {
-                final feed = _current(widget.service.items.value);
-                return Text(
+    return QueryBuilder<List<StashItem>, int>(
+      fetcher: widget.service.loadLibrary,
+      variables: _vars,
+      client: widget.service.queryClient,
+      cacheKey: (_) => stashLibraryKey,
+      builder: (context, query) {
+        final feed = _current(query.data.value ?? const <StashItem>[]);
+        return Scaffold(
+          appBar: AppBar(
+            // The bar grows with the text, so a large font scale does not
+            // overflow it.
+            toolbarHeight: titleHeight + metaHeight + 16,
+            title: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  widget.feed.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                ),
+                const SizedBox(height: 2),
+                Text(
                   '${feed.entries.length} ${feed.entries.length == 1 ? 'entry' : 'entries'}'
                   ' · ${feed.domain}',
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                   style: metaStyle.copyWith(color: scheme.onSurfaceVariant),
-                );
-              },
+                ),
+              ],
             ),
-          ],
-        ),
-      ),
-      body: SignalBuilder(
-        builder: (context) {
-          final feed = _current(widget.service.items.value);
-          final entries = feed.entries;
-          return entries.isEmpty
-              ? const EmptyState(
-                icon: Icons.rss_feed,
-                title: 'Nothing in this feed',
-                body: 'There was nothing in it when it was stashed.',
-              )
-              : ListView.separated(
-                padding: EdgeInsets.only(
-                  bottom: 24 + MediaQuery.paddingOf(context).bottom,
-                ),
-                itemCount: entries.length,
-                separatorBuilder: (_, _) => const Divider(
-                  height: 1,
-                  thickness: 1,
-                  indent: 16,
-                  endIndent: 16,
-                ),
-                itemBuilder: (context, index) {
-                  final entry = entries[index];
-                  if (_stateOf(entry) == EntryReadState.downloadable) {
-                    return FeedEntryDownloadRow(
-                      key: ValueKey('download:${entry.link}'),
-                      feed: feed,
-                      entry: entry,
-                      service: widget.service,
-                      onOpen: _openArticle,
+          ),
+          body: Builder(
+            builder: (context) {
+              final entries = feed.entries;
+              return entries.isEmpty
+                  ? const EmptyState(
+                      icon: Icons.rss_feed,
+                      title: 'Nothing in this feed',
+                      body: 'There was nothing in it when it was stashed.',
+                    )
+                  : ListView.separated(
+                      padding: EdgeInsets.only(
+                        bottom: 24 + MediaQuery.paddingOf(context).bottom,
+                      ),
+                      itemCount: entries.length,
+                      separatorBuilder: (_, _) => const Divider(
+                        height: 1,
+                        thickness: 1,
+                        indent: 16,
+                        endIndent: 16,
+                      ),
+                      itemBuilder: (context, index) {
+                        final entry = entries[index];
+                        if (_stateOf(entry) == EntryReadState.downloadable) {
+                          return FeedEntryDownloadRow(
+                            key: ValueKey('download:${entry.link}'),
+                            feed: feed,
+                            entry: entry,
+                            service: widget.service,
+                            onOpen: _openArticle,
+                          );
+                        }
+                        return FeedEntryRow(
+                          entry: entry,
+                          state: _stateOf(entry),
+                          onRead: () => _onRead(feed, entry),
+                        );
+                      },
                     );
-                  }
-                  return FeedEntryRow(
-                    entry: entry,
-                    state: _stateOf(entry),
-                    onRead: () => _onRead(feed, entry),
-                  );
-                },
-              );
-        },
-      ),
+            },
+          ),
+        );
+      },
     );
   }
 }

@@ -3,11 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:stashify/utils/link_utils.dart';
 
 class SupportChip extends StatelessWidget {
-  const SupportChip({
-    super.key,
-    required this.support,
-    required this.onTap,
-  });
+  const SupportChip({super.key, required this.support, required this.onTap});
 
   final StashSupport support;
   final VoidCallback onTap;
@@ -18,25 +14,25 @@ class SupportChip extends StatelessWidget {
 
     final (icon, label, tint) = switch (support) {
       StashSupport.feed => (
-          Icons.check_circle,
-          'Feed supported',
-          scheme.primary,
-        ),
+        Icons.check_circle,
+        'Feed supported',
+        scheme.primary,
+      ),
       StashSupport.supportedArticle => (
-          Icons.check_circle,
-          'Article supported',
-          scheme.primary,
-        ),
+        Icons.check_circle,
+        'Article supported',
+        scheme.primary,
+      ),
       StashSupport.unsupportedArticle => (
-          Icons.block,
-          'Not supported',
-          scheme.error,
-        ),
+        Icons.block,
+        'Not supported',
+        scheme.error,
+      ),
       StashSupport.none => (
-          Icons.info_outline,
-          'RSS feeds always work',
-          scheme.onSurfaceVariant,
-        ),
+        Icons.info_outline,
+        'RSS feeds always work',
+        scheme.onSurfaceVariant,
+      ),
     };
 
     return ActionChip(

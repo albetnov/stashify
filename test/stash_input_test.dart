@@ -24,24 +24,30 @@ bool _isEnabled(WidgetTester tester, String label) {
 }
 
 void main() {
-  testWidgets('An empty field says feeds always work',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(_host(onSubmit: (_) async => true, pending: signal(false)));
+  testWidgets('An empty field says feeds always work', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(onSubmit: (_) async => true, pending: signal(false)),
+    );
 
     expect(find.text('RSS feeds always work'), findsOneWidget);
     expect(_isEnabled(tester, 'Stash'), isFalse);
   });
 
-  testWidgets('An invalid URL is reported inline and never submitted',
-      (WidgetTester tester) async {
+  testWidgets('An invalid URL is reported inline and never submitted', (
+    WidgetTester tester,
+  ) async {
     final urls = <String>[];
-    await tester.pumpWidget(_host(
-      onSubmit: (url) async {
-        urls.add(url);
-        return true;
-      },
-      pending: signal(false),
-    ));
+    await tester.pumpWidget(
+      _host(
+        onSubmit: (url) async {
+          urls.add(url);
+          return true;
+        },
+        pending: signal(false),
+      ),
+    );
 
     await tester.enterText(find.byType(TextField), 'not a url');
     await tester.pump();
@@ -52,16 +58,19 @@ void main() {
     expect(urls, isEmpty);
   });
 
-  testWidgets('A feed URL activates the chip and is submitted',
-      (WidgetTester tester) async {
+  testWidgets('A feed URL activates the chip and is submitted', (
+    WidgetTester tester,
+  ) async {
     final urls = <String>[];
-    await tester.pumpWidget(_host(
-      onSubmit: (url) async {
-        urls.add(url);
-        return true;
-      },
-      pending: signal(false),
-    ));
+    await tester.pumpWidget(
+      _host(
+        onSubmit: (url) async {
+          urls.add(url);
+          return true;
+        },
+        pending: signal(false),
+      ),
+    );
 
     await tester.enterText(
       find.byType(TextField),
@@ -77,16 +86,19 @@ void main() {
     expect(urls, ['https://example.com/feed.xml']);
   });
 
-  testWidgets('An article on an unsupported site greys the button out',
-      (WidgetTester tester) async {
+  testWidgets('An article on an unsupported site greys the button out', (
+    WidgetTester tester,
+  ) async {
     final urls = <String>[];
-    await tester.pumpWidget(_host(
-      onSubmit: (url) async {
-        urls.add(url);
-        return true;
-      },
-      pending: signal(false),
-    ));
+    await tester.pumpWidget(
+      _host(
+        onSubmit: (url) async {
+          urls.add(url);
+          return true;
+        },
+        pending: signal(false),
+      ),
+    );
 
     await tester.enterText(
       find.byType(TextField),
@@ -103,9 +115,12 @@ void main() {
     expect(urls, isEmpty);
   });
 
-  testWidgets('The badge explains what stashes well',
-      (WidgetTester tester) async {
-    await tester.pumpWidget(_host(onSubmit: (_) async => true, pending: signal(false)));
+  testWidgets('The badge explains what stashes well', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      _host(onSubmit: (_) async => true, pending: signal(false)),
+    );
 
     await tester.enterText(
       find.byType(TextField),
@@ -117,14 +132,19 @@ void main() {
     await tester.pumpAndSettle();
 
     expect(find.text('What stashes well'), findsOneWidget);
-    expect(find.text('These sites are supported: albetnv.dev.'),
-        findsOneWidget);
+    expect(
+      find.text('These sites are supported: albetnv.dev.'),
+      findsOneWidget,
+    );
   });
 
-  testWidgets('The button is pending while the write runs',
-      (WidgetTester tester) async {
+  testWidgets('The button is pending while the write runs', (
+    WidgetTester tester,
+  ) async {
     final pending = signal(false);
-    await tester.pumpWidget(_host(onSubmit: (_) async => true, pending: pending));
+    await tester.pumpWidget(
+      _host(onSubmit: (_) async => true, pending: pending),
+    );
 
     await tester.enterText(
       find.byType(TextField),

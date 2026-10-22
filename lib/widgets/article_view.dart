@@ -40,10 +40,7 @@ class _Block extends StatelessWidget {
         text: text,
       ),
       ArticleParagraph(:final content) => _Paragraph(content: content),
-      ArticleImage(:final url, :final alt) => _BodyImage(
-        url: url,
-        alt: alt,
-      ),
+      ArticleImage(:final url, :final alt) => _BodyImage(url: url, alt: alt),
       ArticleCode(:final code, :final language) => _CodeBlock(
         code: code,
         language: language,
@@ -77,10 +74,7 @@ class _Heading extends StatelessWidget {
     // sections even at a large font scale.
     return Padding(
       padding: const EdgeInsets.only(top: 24, bottom: 8),
-      child: Semantics(
-        header: true,
-        child: Text(text, style: style),
-      ),
+      child: Semantics(header: true, child: Text(text, style: style)),
     );
   }
 }
@@ -144,10 +138,7 @@ class _ParagraphState extends State<_Paragraph> {
           children: [
             for (final inline in widget.content)
               switch (inline) {
-                ArticleText(:final text) => TextSpan(
-                  text: text,
-                  style: body,
-                ),
+                ArticleText(:final text) => TextSpan(text: text, style: body),
                 ArticleCodeSpan(:final code) => TextSpan(
                   text: code,
                   style: codeStyle,
@@ -316,25 +307,24 @@ class _ArticleList extends StatelessWidget {
                 children: [
                   SizedBox(
                     width: 28,
-                    child:
-                        ordered
-                            ? Text(
-                              '${i + 1}.',
-                              style: theme.textTheme.bodyLarge?.copyWith(
+                    child: ordered
+                        ? Text(
+                            '${i + 1}.',
+                            style: theme.textTheme.bodyLarge?.copyWith(
+                              color: theme.colorScheme.onSurfaceVariant,
+                            ),
+                          )
+                        : Padding(
+                            padding: const EdgeInsets.only(top: 8),
+                            child: Container(
+                              width: 6,
+                              height: 6,
+                              decoration: BoxDecoration(
+                                shape: BoxShape.circle,
                                 color: theme.colorScheme.onSurfaceVariant,
                               ),
-                            )
-                            : Padding(
-                              padding: const EdgeInsets.only(top: 8),
-                              child: Container(
-                                width: 6,
-                                height: 6,
-                                decoration: BoxDecoration(
-                                  shape: BoxShape.circle,
-                                  color: theme.colorScheme.onSurfaceVariant,
-                                ),
-                              ),
                             ),
+                          ),
                   ),
                   Expanded(child: _InlineText(content: items[i].content)),
                 ],
@@ -372,10 +362,7 @@ class _InlineText extends StatelessWidget {
         children: [
           for (final inline in content)
             switch (inline) {
-              ArticleText(:final text) => TextSpan(
-                text: text,
-                style: body,
-              ),
+              ArticleText(:final text) => TextSpan(text: text, style: body),
               ArticleCodeSpan(:final code) => TextSpan(
                 text: code,
                 style: codeStyle,

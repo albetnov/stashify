@@ -13,8 +13,9 @@ String? _pathProviderDir;
 /// app startup on the splash forever. Call from setUp in any test that
 /// pumps the app with the real init.
 void mockPathProvider() {
-  _pathProviderDir ??=
-      Directory.systemTemp.createTempSync('stashify-test.').path;
+  _pathProviderDir ??= Directory.systemTemp
+      .createTempSync('stashify-test.')
+      .path;
   final dir = _pathProviderDir!;
   TestDefaultBinaryMessengerBinding.instance.defaultBinaryMessenger
       .setMockMethodCallHandler(

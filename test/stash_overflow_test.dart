@@ -27,8 +27,9 @@ void main() {
     await getIt.reset();
   });
 
-  testWidgets('Stash flow does not overflow on small screen, large text',
-      (WidgetTester tester) async {
+  testWidgets('Stash flow does not overflow on small screen, large text', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0; // 360x640 logical
     addTearDown(tester.view.resetPhysicalSize);
@@ -56,8 +57,9 @@ void main() {
     expect(find.textContaining('Stashify Weekly'), findsOneWidget);
   });
 
-  testWidgets('Home screen does not overflow on small screen, huge text',
-      (WidgetTester tester) async {
+  testWidgets('Home screen does not overflow on small screen, huge text', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0; // 360x640 logical
     addTearDown(tester.view.resetPhysicalSize);

@@ -19,30 +19,21 @@ void main() {
 
   test('an article on a supported site is supported', () {
     expect(
-      supportFor(
-        'https://bbc.co.uk/news/story',
-        articleHosts: {'bbc.co.uk'},
-      ),
+      supportFor('https://bbc.co.uk/news/story', articleHosts: {'bbc.co.uk'}),
       StashSupport.supportedArticle,
     );
   });
 
   test('a supported host covers its subdomains', () {
     expect(
-      supportFor(
-        'https://news.bbc.co.uk/story',
-        articleHosts: {'bbc.co.uk'},
-      ),
+      supportFor('https://news.bbc.co.uk/story', articleHosts: {'bbc.co.uk'}),
       StashSupport.supportedArticle,
     );
   });
 
   test('a lookalike host is not a supported host', () {
     expect(
-      supportFor(
-        'https://evil-bbc.co.uk/story',
-        articleHosts: {'bbc.co.uk'},
-      ),
+      supportFor('https://evil-bbc.co.uk/story', articleHosts: {'bbc.co.uk'}),
       StashSupport.unsupportedArticle,
     );
   });
@@ -61,27 +52,23 @@ void main() {
   });
 
   test('a site without an adapter is not supported', () {
-    expect(supportFor('https://example.com/some/article'),
-        StashSupport.unsupportedArticle);
+    expect(
+      supportFor('https://example.com/some/article'),
+      StashSupport.unsupportedArticle,
+    );
   });
 
   group('isSupportedArticleHost', () {
     test('checks the host only, never the feed sniffing', () {
       expect(isSupportedArticleHost('https://albetnv.dev/blog/story'), isTrue);
-      expect(
-        isSupportedArticleHost('https://notes.albetnv.dev/x'),
-        isTrue,
-      );
+      expect(isSupportedArticleHost('https://notes.albetnv.dev/x'), isTrue);
       // A path that looks like a feed must not matter for entry links.
       expect(isSupportedArticleHost('https://albetnv.dev/feed.xml'), isTrue);
     });
 
     test('rejects unknown hosts and nonsense', () {
       expect(isSupportedArticleHost('https://example.com/story'), isFalse);
-      expect(
-        isSupportedArticleHost('https://evil-albetnv.dev/story'),
-        isFalse,
-      );
+      expect(isSupportedArticleHost('https://evil-albetnv.dev/story'), isFalse);
       expect(isSupportedArticleHost('not a url'), isFalse);
       expect(isSupportedArticleHost(''), isFalse);
     });

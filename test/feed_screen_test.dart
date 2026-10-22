@@ -7,27 +7,24 @@ import 'package:stashify/screens/feed_screen.dart';
 import 'package:stashify/services/stash_service.dart';
 
 StashItem _feed({List<StashEntry> entries = const []}) => StashItem(
-      id: 's1',
-      url: 'https://example.com/feed.xml',
-      title: 'Stashify Weekly',
-      domain: 'example.com',
-      savedAt: DateTime.now(),
-      isFeed: true,
-      entries: entries,
-    );
+  id: 's1',
+  url: 'https://example.com/feed.xml',
+  title: 'Stashify Weekly',
+  domain: 'example.com',
+  savedAt: DateTime.now(),
+  isFeed: true,
+  entries: entries,
+);
 
 List<StashEntry> _entries() => [
-      StashEntry(
-        title: 'Reading on the train',
-        link: 'https://example.com/one',
-        summary: 'Why offline still wins',
-        publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
-      ),
-      StashEntry(
-        title: 'Second entry',
-        link: 'https://example.com/two',
-      ),
-    ];
+  StashEntry(
+    title: 'Reading on the train',
+    link: 'https://example.com/one',
+    summary: 'Why offline still wins',
+    publishedAt: DateTime.now().subtract(const Duration(hours: 2)),
+  ),
+  StashEntry(title: 'Second entry', link: 'https://example.com/two'),
+];
 
 Widget _screen(
   StashItem feed, {
@@ -47,8 +44,9 @@ Widget _screen(
 }
 
 void main() {
-  testWidgets('The screen lists the entries of the feed',
-      (WidgetTester tester) async {
+  testWidgets('The screen lists the entries of the feed', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(_screen(_feed(entries: _entries())));
 
     expect(find.text('Stashify Weekly'), findsOneWidget);
@@ -62,8 +60,9 @@ void main() {
     expect(find.text('Not supported'), findsNothing);
   });
 
-  testWidgets('A linked entry opens its live page in the app browser',
-      (WidgetTester tester) async {
+  testWidgets('A linked entry opens its live page in the app browser', (
+    WidgetTester tester,
+  ) async {
     final opened = <Uri>[];
     await tester.pumpWidget(
       _screen(
@@ -78,14 +77,11 @@ void main() {
     expect(opened, [Uri.parse('https://example.com/one')]);
   });
 
-  testWidgets('An entry with no openable link explains itself',
-      (WidgetTester tester) async {
+  testWidgets('An entry with no openable link explains itself', (
+    WidgetTester tester,
+  ) async {
     await tester.pumpWidget(
-      _screen(
-        _feed(
-          entries: const [StashEntry(title: 'No link at all')],
-        ),
-      ),
+      _screen(_feed(entries: const [StashEntry(title: 'No link at all')])),
     );
 
     await tester.tap(find.text('Not supported'));
@@ -94,8 +90,7 @@ void main() {
     expect(find.text('This entry has no link to open.'), findsOneWidget);
   });
 
-  testWidgets('A feed with nothing in it says so',
-      (WidgetTester tester) async {
+  testWidgets('A feed with nothing in it says so', (WidgetTester tester) async {
     await tester.pumpWidget(_screen(_feed()));
 
     expect(find.text('Nothing in this feed'), findsOneWidget);
@@ -105,8 +100,9 @@ void main() {
     );
   });
 
-  testWidgets('The entries hold up on a small screen with large text',
-      (WidgetTester tester) async {
+  testWidgets('The entries hold up on a small screen with large text', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0; // 360x640 logical
     addTearDown(tester.view.resetPhysicalSize);
@@ -123,8 +119,9 @@ void main() {
     expect(find.widgetWithText(TextButton, 'Read'), findsNWidgets(2));
   });
 
-  testWidgets('The screen holds up at a large font scale',
-      (WidgetTester tester) async {
+  testWidgets('The screen holds up at a large font scale', (
+    WidgetTester tester,
+  ) async {
     tester.view.physicalSize = const Size(720, 1280);
     tester.view.devicePixelRatio = 2.0; // 360x640 logical
     addTearDown(tester.view.resetPhysicalSize);
@@ -148,15 +145,18 @@ void main() {
     expect(meta.bottom, lessThanOrEqualTo(bar.bottom));
   });
 
-  testWidgets('A long entry does not overflow its row',
-      (WidgetTester tester) async {
+  testWidgets('A long entry does not overflow its row', (
+    WidgetTester tester,
+  ) async {
     final feed = _feed(
       entries: [
         StashEntry(
-          title: 'A headline long enough to need more than the two lines the '
+          title:
+              'A headline long enough to need more than the two lines the '
               'row gives it before it ellipsises',
           link: 'https://example.com/one',
-          summary: 'A summary long enough to need more than the two lines '
+          summary:
+              'A summary long enough to need more than the two lines '
               'the row gives it before it ellipsises, and then some more '
               'words on top of that for good measure.',
           publishedAt: DateTime(2024, 3, 14),

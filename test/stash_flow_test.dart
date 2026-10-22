@@ -28,8 +28,9 @@ void main() {
     await getIt.reset();
   });
 
-  testWidgets('Feed URL activates chip and stashes with progress',
-      (WidgetTester tester) async {
+  testWidgets('Feed URL activates chip and stashes with progress', (
+    WidgetTester tester,
+  ) async {
     await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(const StashifyApp());
     await tester.pumpAndSettle();
@@ -52,8 +53,9 @@ void main() {
     expect(find.text('Saved for offline reading.'), findsOneWidget);
   });
 
-  testWidgets('Tapping a stashed feed opens its entries',
-      (WidgetTester tester) async {
+  testWidgets('Tapping a stashed feed opens its entries', (
+    WidgetTester tester,
+  ) async {
     await tester.runAsync(() => setupServicesAsync());
     await tester.pumpWidget(const StashifyApp());
     await tester.pumpAndSettle();

@@ -30,8 +30,9 @@ class EmptyState extends StatelessWidget {
               Text(
                 body,
                 textAlign: TextAlign.center,
-                style:
-                    text.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
             ],
           ),

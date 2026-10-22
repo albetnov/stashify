@@ -6,9 +6,7 @@ import 'package:path/path.dart' as p;
 import 'package:sqlite3_driver_forge/sqlite3_driver_forge.dart';
 
 Future<void> _create(SqliteDriver db) async {
-  await db.execute(
-    'CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT NOT NULL)',
-  );
+  await db.execute('CREATE TABLE t (id INTEGER PRIMARY KEY, v TEXT NOT NULL)');
 }
 
 void main() {

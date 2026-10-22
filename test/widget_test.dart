@@ -13,8 +13,9 @@ void main() {
     mockPathProvider();
   });
 
-  testWidgets('Home screen shows stash input and an empty stash',
-      (WidgetTester tester) async {
+  testWidgets('Home screen shows stash input and an empty stash', (
+    WidgetTester tester,
+  ) async {
     // Real async zone: the driver's worker-isolate handshake never
     // resolves under testWidgets' FakeAsync. Pre-warmed here, reused by
     // the gate's own init when the app pumps below.
@@ -25,8 +26,9 @@ void main() {
     expect(find.text('Stashify'), findsOneWidget);
     expect(find.text('Save for offline reading'), findsOneWidget);
     expect(
-        find.widgetWithText(TextField, 'Paste article or feed URL'),
-        findsOneWidget);
+      find.widgetWithText(TextField, 'Paste article or feed URL'),
+      findsOneWidget,
+    );
     expect(find.text('Saved'), findsOneWidget);
     expect(find.text('Nothing stashed yet'), findsOneWidget);
     expect(find.byIcon(Icons.wifi_off_outlined), findsOneWidget);

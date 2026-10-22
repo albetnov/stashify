@@ -59,9 +59,7 @@ void main() {
       domain: 'x.dev',
       savedAt: DateTime.utc(2024, 1, 1),
       isFeed: true,
-      entries: const [
-        StashEntry(title: 'E1', link: 'https://x.dev/e1'),
-      ],
+      entries: const [StashEntry(title: 'E1', link: 'https://x.dev/e1')],
     );
     await store.saveItem(
       StashItemRow(
@@ -101,9 +99,7 @@ void main() {
         readMinutes: 0,
         position: 0,
       ),
-      [
-        EntryRow(feedId: 'f1', title: 'E1', position: 0),
-      ],
+      [EntryRow(feedId: 'f1', title: 'E1', position: 0)],
     );
     await store.removeItem('f1');
     expect(await store.loadLibrary(), isEmpty);

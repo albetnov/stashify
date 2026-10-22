@@ -76,6 +76,7 @@ class _HomeScreenState extends State<HomeScreen> {
         child: QueryBuilder<List<StashItem>, int>(
           fetcher: _service.loadLibrary,
           variables: _vars,
+          client: _service.queryClient,
           cacheKey: (_) => stashLibraryKey,
           builder: (context, query) {
             final items = query.data.value ?? const <StashItem>[];

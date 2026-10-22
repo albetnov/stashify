@@ -75,10 +75,7 @@ class InitErrorScreen extends StatelessWidget {
                 children: [
                   Icon(Icons.error_outline, size: 48, color: scheme.error),
                   const SizedBox(height: 12),
-                  Text(
-                    'Couldn’t open your library',
-                    style: text.titleMedium,
-                  ),
+                  Text('Couldn’t open your library', style: text.titleMedium),
                   const SizedBox(height: 4),
                   Text(
                     'Your saved items are still on this device. '

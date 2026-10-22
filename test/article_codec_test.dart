@@ -35,21 +35,18 @@ void _expectSame(Article actual, Article expected) {
   expect(actual.coverImageUrl, expected.coverImageUrl);
   expect(actual.blocks.length, expected.blocks.length);
   expect(actual.blocks[0], isA<ArticleHeading>());
-  expect(
-    (actual.blocks[1] as ArticleParagraph).content.map((e) => e.text),
-    ['One pass beats two. ', 'Read more', 'O(n)'],
-  );
-  expect(
-    (actual.blocks[1] as ArticleParagraph).content[1],
-    isA<ArticleLink>(),
-  );
+  expect((actual.blocks[1] as ArticleParagraph).content.map((e) => e.text), [
+    'One pass beats two. ',
+    'Read more',
+    'O(n)',
+  ]);
+  expect((actual.blocks[1] as ArticleParagraph).content[1], isA<ArticleLink>());
   expect(actual.blocks[2], isA<ArticleImage>());
   expect((actual.blocks[3] as ArticleCode).language, 'dart');
   expect((actual.blocks[4] as ArticleList).ordered, isTrue);
   expect((actual.blocks[4] as ArticleList).items, hasLength(2));
   expect(
-    ((actual.blocks[5] as ArticleQuote).blocks.single
-            as ArticleParagraph)
+    ((actual.blocks[5] as ArticleQuote).blocks.single as ArticleParagraph)
         .content
         .single
         .text,

@@ -15,8 +15,10 @@ Future<void> showSupportedSheet(BuildContext context) {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text('What stashes well',
-                style: Theme.of(context).textTheme.titleLarge),
+            Text(
+              'What stashes well',
+              style: Theme.of(context).textTheme.titleLarge,
+            ),
             const SizedBox(height: 12),
             const _SupportedRow(
               icon: Icons.rss_feed,
@@ -30,7 +32,7 @@ Future<void> showSupportedSheet(BuildContext context) {
               body: supportedArticleHosts.isEmpty
                   ? 'Not yet — no sites are supported.'
                   : 'These sites are supported: '
-                      '${supportedArticleHosts.join(', ')}.',
+                        '${supportedArticleHosts.join(', ')}.',
             ),
           ],
         ),
@@ -51,11 +53,10 @@ Future<void> showEntrySheet(BuildContext context, StashEntry entry) {
     if (domain.isNotEmpty) domain,
     if (published.isNotEmpty) published,
   ].join(' · ');
-  final body =
-      domain.isEmpty
-          ? 'This entry has no link to open.'
-          : 'Articles from $domain aren’t supported yet. Stashify can '
-              'read articles from ${supportedArticleHosts.join(', ')}.';
+  final body = domain.isEmpty
+      ? 'This entry has no link to open.'
+      : 'Articles from $domain aren’t supported yet. Stashify can '
+            'read articles from ${supportedArticleHosts.join(', ')}.';
 
   return showModalBottomSheet<void>(
     context: context,
@@ -115,8 +116,9 @@ Future<void> showReaderSheet(BuildContext context, StashItem item) {
                 '${item.domain} · saved ${timeAgo(item.savedAt)}'
                 '${item.isFeed ? '' : ' · ${item.readMinutes} min read'}'
                 ' · available offline',
-                style: text.bodyMedium
-                    ?.copyWith(color: scheme.onSurfaceVariant),
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
               ),
               const SizedBox(height: 16),
               Text(
@@ -166,9 +168,12 @@ class _SupportedRow extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(title, style: text.titleSmall),
-              Text(body,
-                  style: text.bodyMedium
-                      ?.copyWith(color: scheme.onSurfaceVariant)),
+              Text(
+                body,
+                style: text.bodyMedium?.copyWith(
+                  color: scheme.onSurfaceVariant,
+                ),
+              ),
             ],
           ),
         ),

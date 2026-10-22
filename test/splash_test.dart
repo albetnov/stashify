@@ -32,9 +32,7 @@ void main() {
   testWidgets('A slow start shows the splash, then home', (
     WidgetTester tester,
   ) async {
-    await tester.pumpWidget(
-      const StashifyApp(initServices: _slowInit),
-    );
+    await tester.pumpWidget(const StashifyApp(initServices: _slowInit));
 
     expect(find.text('Getting your library ready…'), findsOneWidget);
 

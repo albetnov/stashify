@@ -34,7 +34,7 @@ StashService _serviceServing(
   Duration delay = Duration.zero,
 }) {
   return StashService(
-    client: MockClient((_) async {
+    client: MockClient((request) async {
       if (delay > Duration.zero) {
         await Future<void>.delayed(delay);
       }
@@ -142,10 +142,7 @@ void main() {
     await tester.tap(find.widgetWithText(TextButton, 'Read'));
     await tester.pumpAndSettle();
 
-    expect(
-      find.text('Could not fetch albetnv.dev (404).'),
-      findsOneWidget,
-    );
+    expect(find.text('Could not fetch albetnv.dev (404).'), findsOneWidget);
     // Nothing cached: the row still offers Read, with no offline mark.
     expect(find.widgetWithText(TextButton, 'Read'), findsOneWidget);
     expect(find.byIcon(Icons.offline_pin_outlined), findsNothing);
@@ -186,10 +183,7 @@ void main() {
   ) async {
     final service = _serviceServing(_pageHtml);
     final feed = await _seed(service, [
-      StashEntry(
-        title: 'Elsewhere',
-        link: 'https://example.com/elsewhere',
-      ),
+      StashEntry(title: 'Elsewhere', link: 'https://example.com/elsewhere'),
     ]);
     var opened = 0;
     await tester.pumpWidget(

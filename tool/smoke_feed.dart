@@ -17,7 +17,7 @@ Future<void> main() async {
     print('    ${entry.publishedAt}  ${entry.link}');
     print('    ${entry.summary}');
   }
-  print('in the signal: ${service.items.value.length}');
+  print('in the library: ${(await service.loadLibrary()).length}');
 
   try {
     await service.stash('https://example.com/not-a-feed');

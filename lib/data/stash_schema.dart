@@ -60,8 +60,7 @@ class StashItemRow {
       'is_feed': isFeed ? 1 : 0,
       'read_minutes': readMinutes,
       'position': position,
-      'article_json':
-          body == null ? null : ArticleCodec.encodeString(body),
+      'article_json': body == null ? null : ArticleCodec.encodeString(body),
     };
   }
 
@@ -109,10 +108,9 @@ class EntryRow {
       title: row['title'] as String? ?? '',
       link: row['link'] as String?,
       summary: row['summary'] as String?,
-      publishedAt:
-          published is int
-              ? DateTime.fromMillisecondsSinceEpoch(published, isUtc: true)
-              : null,
+      publishedAt: published is int
+          ? DateTime.fromMillisecondsSinceEpoch(published, isUtc: true)
+          : null,
       position: row['position'] is int ? row['position'] as int : 0,
       article: ArticleCodec.tryDecodeString(row['article_json'] as String?),
     );
@@ -128,8 +126,7 @@ class EntryRow {
       'summary': summary,
       'published_at': publishedAt?.millisecondsSinceEpoch,
       'position': position,
-      'article_json':
-          body == null ? null : ArticleCodec.encodeString(body),
+      'article_json': body == null ? null : ArticleCodec.encodeString(body),
     };
   }
 
@@ -206,10 +203,11 @@ const entries = EntriesTable();
 
 /// The v1 schema: query declarations bridged to the migrator, plus the one
 /// piece columns don't carry — the composite unique on entries.
-MigrationSchema stashSchema() => schemaOf(version: 1, tables: [items, entries]).extend(
-  indexes: {
-    'entries': [
-      SchemaIndex(columns: ['feed_id', 'link'], unique: true),
-    ],
-  },
-);
+MigrationSchema stashSchema() =>
+    schemaOf(version: 1, tables: [items, entries]).extend(
+      indexes: {
+        'entries': [
+          SchemaIndex(columns: ['feed_id', 'link'], unique: true),
+        ],
+      },
+    );
