@@ -1,3 +1,4 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:flutter/material.dart';
 import 'package:fetch_forge/flutter.dart';
 import 'package:signals/signals_flutter.dart';
@@ -6,6 +7,7 @@ import 'package:http/http.dart' as http;
 import 'package:stashify/models/article.dart';
 import 'package:stashify/models/stash_item.dart';
 import 'package:stashify/screens/reader_screen.dart';
+import 'package:stashify/services/service_locator.dart';
 import 'package:stashify/services/stash_service.dart';
 import 'package:stashify/utils/browser.dart';
 import 'package:stashify/utils/link_utils.dart';
@@ -26,6 +28,9 @@ typedef OpenBrowser = void Function(BuildContext context, Uri url);
 /// that itself fails must not block reading.
 Future<bool> _checkOnline() async {
   try {
+    final conn = await getIt<Connectivity>().checkConnectivity();
+    if (!conn.hasConnectivity) return false;
+
     final response = await http
         .head(Uri.parse('https://www.google.com/generate_204'))
         .timeout(const Duration(seconds: 3));

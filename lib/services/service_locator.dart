@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:fetch_forge/fetch_forge.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/services.dart';
@@ -91,6 +92,10 @@ void setupServices() {
       () async => StashStore(await getIt.getAsync<Forge>()),
       dependsOn: [Forge],
     );
+  }
+
+  if (!getIt.isRegistered<Connectivity>()) {
+    getIt.registerSingleton<Connectivity>(Connectivity());
   }
 
   if (getIt.isRegistered<StashService>()) return;
